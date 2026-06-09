@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #0b1220;
+  --color-panel: #101a2e;
+  --color-panel-2: #16233c;
+  --color-line: #233453;
+  --color-ink: #e8eefc;
+  --color-ink-dim: #93a4c4;
+  --color-accent: #f97316;
+  --color-accent-soft: #fb923c;
+  --color-good: #22c55e;
+  --color-warn: #eab308;
+  --color-hot: #ef4444;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Floating glass panels over the satellite map */
+.rr-panel {
+  background: color-mix(in srgb, var(--color-panel) 86%, transparent);
+  backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in srgb, var(--color-line) 80%, transparent);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.45);
+}
+
+.rr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-dim);
+  cursor: pointer;
+  user-select: none;
+  transition: all 120ms ease;
+}
+
+.rr-chip:hover {
+  border-color: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.rr-chip[data-active="true"] {
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  border-color: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.rr-input {
+  width: 100%;
+  background: var(--color-panel-2);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.rr-input:focus {
+  border-color: var(--color-accent);
+}
+
+.rr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 120ms ease;
+  border: 1px solid transparent;
+}
+
+.rr-btn-primary {
+  background: var(--color-accent);
+  color: #1a0e02;
+}
+
+.rr-btn-primary:hover {
+  background: var(--color-accent-soft);
+}
+
+.rr-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rr-btn-ghost {
+  border-color: var(--color-line);
+  color: var(--color-ink-dim);
+  background: transparent;
+}
+
+.rr-btn-ghost:hover {
+  color: var(--color-ink);
+  border-color: var(--color-accent);
+}
+
+/* Shift-drag selection box */
+.rr-select-box {
+  position: absolute;
+  border: 1.5px dashed var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  pointer-events: none;
+  z-index: 30;
+}
+
+/* Mapbox chrome tuned to the dark UI */
+.mapboxgl-ctrl-attrib {
+  background: rgb(11 18 32 / 0.7) !important;
+}
+
+.mapboxgl-ctrl-attrib a {
+  color: var(--color-ink-dim) !important;
+}
+
+.mapboxgl-popup-content {
+  background: var(--color-panel) !important;
+  color: var(--color-ink) !important;
+  border: 1px solid var(--color-line);
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.5) !important;
+  font-family: var(--font-sans);
+  padding: 12px 14px !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: var(--color-panel) !important;
+  border-bottom-color: var(--color-panel) !important;
+}
+
+.mapboxgl-popup-close-button {
+  color: var(--color-ink-dim) !important;
+  font-size: 16px;
+  right: 6px !important;
+  top: 4px !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

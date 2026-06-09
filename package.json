@@ -1,0 +1,40 @@
+{
+  "name": "roof-radar",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "ingest:orlando": "tsx scripts/ingest-orlando.ts",
+    "ingest:volusia-api": "tsx scripts/ingest-volusia-api.ts",
+    "ingest:nal": "tsx scripts/ingest-nal.ts",
+    "ingest:file": "tsx scripts/ingest-file.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.1",
+    "adm-zip": "^0.5.17",
+    "csv-parse": "^6.2.1",
+    "dotenv": "^16.4.5",
+    "lucide-react": "^0.561.0",
+    "mapbox-gl": "^3.24.0",
+    "next": "15.5.19",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@tailwindcss/postcss": "^4",
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.19",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5"
+  }
+}
