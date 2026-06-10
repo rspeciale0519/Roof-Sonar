@@ -130,7 +130,9 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
         layout: {
           "text-field": [
             "format",
-            ["get", "street_number"], { "font-scale": 1.15, "text-font": ["literal", ["DIN Pro Bold", "Arial Unicode MS Bold"]] },
+            // per-section text-color keeps the street number white while the
+            // age/squares lines take the bucket color from paint.text-color
+            ["get", "street_number"], { "font-scale": 1.15, "text-font": ["literal", ["DIN Pro Bold", "Arial Unicode MS Bold"]], "text-color": "#ffffff" },
             "\n", {},
             ["get", "age_label"], { "font-scale": 0.9 },
             "\n", {},
@@ -148,41 +150,16 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
         },
       });
 
-      // street number line stays white per spec; color the age line instead is
-      // not separable in one symbol layer, so the whole label takes the bucket
-      // color with a dark halo — street number gets a white overlay layer:
-      map.addLayer({
-        id: "property-streetnum",
-        type: "symbol",
-        source: "properties",
-        minzoom: LABEL_ZOOM,
-        layout: {
-          "text-field": ["get", "street_number"],
-          "text-size": 16,
-          "text-offset": [0, -1.05],
-          "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-          // pure overlay on the 3-line label's first line: must neither hide
-          // when overlapping it nor knock it out of collision placement
-          "text-allow-overlap": true,
-          "text-ignore-placement": true,
-        },
-        paint: {
-          "text-color": "#ffffff",
-          "text-halo-color": "#0b1220",
-          "text-halo-width": 1.8,
-        },
-      });
-
       const clickHandler = (e: mapboxgl.MapMouseEvent) => {
         const features = map.queryRenderedFeatures(e.point, {
-          layers: ["property-labels", "property-dots", "property-streetnum"],
+          layers: ["property-labels", "property-dots"],
         });
         const f = features[0];
         if (!f?.properties?.payload) return;
         onToggleRef.current(JSON.parse(f.properties.payload as string) as MapProperty);
       };
       map.on("click", clickHandler);
-      for (const layer of ["property-labels", "property-dots", "property-streetnum"]) {
+      for (const layer of ["property-labels", "property-dots"]) {
         map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));
         map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
       }
@@ -295,7 +272,7 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
       setBox(null);
       map.dragPan.enable();
       const features = map.queryRenderedFeatures([sw, ne] as [mapboxgl.PointLike, mapboxgl.PointLike], {
-        layers: ["property-dots", "property-labels", "property-streetnum"],
+        layers: ["property-dots", "property-labels"],
       });
       const seen = new Set<number>();
       const picked: MapProperty[] = [];
