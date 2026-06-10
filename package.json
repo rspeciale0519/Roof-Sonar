@@ -1,5 +1,5 @@
 {
-  "name": "roof-radar",
+  "name": "roof-sonar",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "ingest:orlando": "tsx scripts/ingest-orlando.ts",
     "ingest:volusia-api": "tsx scripts/ingest-volusia-api.ts",
     "ingest:nal": "tsx scripts/ingest-nal.ts",
@@ -34,6 +35,7 @@
     "eslint-config-next": "15.5.19",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }

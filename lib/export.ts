@@ -1,10 +1,9 @@
 import type { MapProperty } from "./types";
-import { roofAgeLabel, OCCUPANCIES } from "./types";
+import { roofAgeLabel, occLabel } from "./types";
 
 /** Route CSV per PRD: stop #, address, roof age, squares, owner, occupancy, lat, lon. */
 export function routeCsv(ordered: MapProperty[]): string {
   const header = ["Stop", "Address", "Roof Age", "Roofing Squares", "Owner Name", "Occupancy", "Lat", "Lon"];
-  const occLabel = (k: string) => OCCUPANCIES.find((o) => o.key === k)?.label ?? k;
   const rows = ordered.map((p, i) => [
     String(i + 1),
     p.situs_address,

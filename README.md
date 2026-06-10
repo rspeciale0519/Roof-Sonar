@@ -1,10 +1,10 @@
-# RoofRadar
+# RoofSonar
 
 Internal roofing-sales tool for **Seminole, Volusia, and Orange counties**: a satellite
 map showing each house's street number, roof age (from public roofing permits), and
 roofing squares — plus owner name and owner-occupied vs. rental classification from the
 FL DOR tax roll. Select houses, export ordered door-knocking routes.
-Source of truth: [`roof-radar-prd.md`](./roof-radar-prd.md).
+Source of truth: [`PRD.md`](./PRD.md). Domain: roofsonar.com.
 
 ## Stack
 

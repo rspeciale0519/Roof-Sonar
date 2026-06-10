@@ -37,6 +37,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# supabase cli
+supabase/.temp/
+
+# transient task notes/artifacts (CLAUDE.md Rule 5)
+docs/temp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

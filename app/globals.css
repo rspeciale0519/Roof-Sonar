@@ -12,7 +12,13 @@
   --color-good: #22c55e;
   --color-warn: #eab308;
   --color-hot: #ef4444;
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Font theme vars must be `inline`: they reference next/font variables that
+   only exist on <body>, and a plain @theme emits an unresolvable var() at
+   :root — the browser then silently falls back to Times New Roman. */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
@@ -21,7 +27,9 @@ body {
   height: 100%;
   background: var(--color-surface);
   color: var(--color-ink);
-  font-family: var(--font-sans);
+  /* reference the next/font variable directly — @theme inline values are
+     build-time only and emit no --font-sans custom property at runtime */
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -66,7 +74,7 @@ body {
   border: 1px solid var(--color-line);
   border-radius: 10px;
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--color-ink);
   outline: none;
   transition: border-color 120ms ease;
@@ -74,6 +82,12 @@ body {
 
 .rr-input:focus {
   border-color: var(--color-accent);
+}
+
+@media (min-width: 768px) {
+  .rr-input {
+    font-size: 14px;
+  }
 }
 
 .rr-btn {
@@ -139,7 +153,7 @@ body {
   border: 1px solid var(--color-line);
   border-radius: 12px !important;
   box-shadow: 0 8px 32px rgb(0 0 0 / 0.5) !important;
-  font-family: var(--font-sans);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   padding: 12px 14px !important;
 }
 

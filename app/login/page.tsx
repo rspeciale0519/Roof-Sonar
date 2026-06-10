@@ -36,7 +36,7 @@ function LoginForm() {
             <Radar className="h-7 w-7 text-accent" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">RoofRadar</h1>
+            <h1 className="text-xl font-bold tracking-tight">RoofSonar</h1>
             <p className="mt-1 text-sm text-ink-dim">Seminole · Volusia · Orange</p>
           </div>
         </div>

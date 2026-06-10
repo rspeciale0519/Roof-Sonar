@@ -11,6 +11,11 @@ export interface MapProperty {
   occupancy: "owner" | "likely_owner" | "absentee" | "investor" | "unknown";
   jurisdiction: string;
   last_permit_date: string | null;
+  do_not_knock: boolean;
+  pin_type_id: number | null;
+  pin_label: string | null;
+  pin_color: string | null;
+  pin_knocked_at: string | null;
 }
 
 export type AgeBucket = "0-5" | "6-10" | "11-15" | "16+" | "unknown";
@@ -40,6 +45,8 @@ export function ageBucket(roofYear: number | null): AgeBucket {
   return "16+";
 }
 
+export const occLabel = (k: string) => OCCUPANCIES.find((o) => o.key === k)?.label ?? k;
+
 /** Map label line 2: "18 yrs" from a permit, else "orig. '94" from year_built. */
 export function roofAgeLabel(p: Pick<MapProperty, "roof_year" | "year_built">): string {
   if (p.roof_year != null) return `${new Date().getFullYear() - p.roof_year} yrs`;
@@ -47,9 +54,60 @@ export function roofAgeLabel(p: Pick<MapProperty, "roof_year" | "year_built">): 
   return "—";
 }
 
+export type RouteStatus = "draft" | "assigned" | "in_progress" | "completed";
+
 export interface SavedRoute {
   id: number;
   name: string;
   created_at: string;
   stop_count?: number;
+  status: RouteStatus;
+  rep_id: number | null;
+  rep_name: string | null;
+}
+
+export interface SalesRep {
+  id: number;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  active: boolean;
+}
+
+export interface PinType {
+  id: number;
+  label: string;
+  color: string;
+  icon: string | null;
+  expires_after_days: number | null;
+  is_do_not_knock: boolean;
+  counts_as_contact: boolean;
+  counts_as_lead: boolean;
+  archived: boolean;
+  sort_order: number;
+}
+
+export interface Tag {
+  id: number;
+  label: string;
+  archived: boolean;
+}
+
+export interface Visit {
+  id: number;
+  pin_type_id: number;
+  pin_label: string;
+  pin_color: string;
+  rep_id: number | null;
+  rep_name: string | null;
+  route_id: number | null;
+  note: string | null;
+  knocked_at: string;
+}
+
+export interface PropertyNote {
+  id: number;
+  body: string;
+  rep_name: string | null; // null = admin
+  created_at: string;
 }
