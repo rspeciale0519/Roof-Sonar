@@ -2,24 +2,48 @@
 
 import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import type { MapProperty, SavedRoute } from "@/lib/types";
+import type { MapProperty, PinType, SalesRep, SavedRoute } from "@/lib/types";
 import type { MapFilters } from "./map-view";
 import FilterSidebar from "./filter-sidebar";
 import SelectionPanel from "./selection-panel";
 import PropertyModal from "./property-modal";
+import PinTray from "./pin-tray";
 
 const MapView = dynamic(() => import("./map-view"), { ssr: false });
+
+interface UndoState {
+  visitId: number;
+  label: string;
+  address: string;
+}
 
 export default function MapApp() {
   const [filters, setFilters] = useState<MapFilters>({ jurisdictions: [], ages: [], occupancies: [] });
   const [visibleCount, setVisibleCount] = useState(0);
-  // Selection survives viewport changes: we keep full property objects.
   const [selection, setSelection] = useState<Map<number, MapProperty>>(new Map());
   const [startId, setStartId] = useState<number | null>(null);
   const [savedRoutes, setSavedRoutes] = useState<SavedRoute[]>([]);
   const [flyTo, setFlyTo] = useState<{ lng: number; lat: number } | null>(null);
   const [modalPropertyId, setModalPropertyId] = useState<number | null>(null);
   const [mapRefresh, setMapRefresh] = useState(0);
+
+  const [pinTypes, setPinTypes] = useState<PinType[]>([]);
+  const [reps, setReps] = useState<SalesRep[]>([]);
+  const [armedPinId, setArmedPinId] = useState<number | null>(null);
+  const [actingRepId, setActingRepId] = useState<number | null>(null);
+  const [undo, setUndo] = useState<UndoState | null>(null);
+  const [pinDropError, setPinDropError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/pin-types")
+      .then((r) => r.json())
+      .then((j) => setPinTypes((j.pin_types as PinType[]) ?? []))
+      .catch(() => undefined);
+    fetch("/api/reps")
+      .then((r) => r.json())
+      .then((j) => setReps((j.reps as SalesRep[]) ?? []))
+      .catch(() => undefined);
+  }, []);
 
   const refreshRoutes = useCallback(async () => {
     const res = await fetch("/api/routes");
@@ -80,6 +104,47 @@ export default function MapApp() {
     [refreshRoutes]
   );
 
+  const handlePinDrop = useCallback(
+    async (propertyId: number, address: string) => {
+      const pin = pinTypes.find((p) => p.id === armedPinId);
+      if (!pin) return;
+      setPinDropError(null);
+      try {
+        const res = await fetch("/api/visits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ property_id: propertyId, pin_type_id: pin.id, rep_id: actingRepId }),
+        });
+        const j = (await res.json()) as { visit_id?: number; error?: string };
+        if (!res.ok) {
+          setPinDropError(j.error ?? `Drop failed (${res.status})`);
+          return;
+        }
+        const visitId = j.visit_id!;
+        setUndo({ visitId, label: pin.label, address });
+        setMapRefresh((n) => n + 1);
+        setTimeout(() => setUndo((u) => (u?.visitId === visitId ? null : u)), 10000);
+      } catch {
+        setPinDropError("Network error — try again");
+      }
+    },
+    [pinTypes, armedPinId, actingRepId]
+  );
+
+  const handleUndo = useCallback(async () => {
+    if (!undo) return;
+    const { visitId } = undo;
+    try {
+      const res = await fetch(`/api/visits/${visitId}`, { method: "DELETE" });
+      if (res.ok) {
+        setUndo(null);
+        setMapRefresh((n) => n + 1);
+      }
+    } catch {
+      // silently ignore network errors on undo
+    }
+  }, [undo]);
+
   return (
     <main className="relative h-screen w-screen overflow-hidden">
       <MapView
@@ -91,6 +156,8 @@ export default function MapApp() {
         flyTo={flyTo}
         onOpenProperty={setModalPropertyId}
         refreshTrigger={mapRefresh}
+        armedPinId={armedPinId}
+        onPinDrop={handlePinDrop}
       />
       <FilterSidebar
         filters={filters}
@@ -120,6 +187,46 @@ export default function MapApp() {
           onDataChanged={() => setMapRefresh((n) => n + 1)}
         />
       )}
+
+      {(undo || pinDropError) && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-28 z-40 flex flex-col items-center gap-2">
+          {pinDropError && (
+            <div className="pointer-events-auto rr-panel flex items-center gap-3 px-4 py-2 text-[13px] text-hot">
+              <span>{pinDropError}</span>
+              <button onClick={() => setPinDropError(null)} className="text-ink-dim hover:text-ink" aria-label="Dismiss error">
+                ✕
+              </button>
+            </div>
+          )}
+          {undo && (
+            <div className="pointer-events-auto rr-panel flex items-center gap-3 px-4 py-2 text-[13px]">
+              <span className="text-ink-dim">
+                <span className="font-semibold text-ink">{undo.label}</span>
+                {" → "}
+                {undo.address}
+              </span>
+              <button
+                onClick={() => void handleUndo()}
+                className="rr-btn rr-btn-ghost px-3 py-1 text-[12px]"
+              >
+                Undo
+              </button>
+              <button onClick={() => setUndo(null)} className="text-ink-dim hover:text-ink" aria-label="Dismiss undo">
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <PinTray
+        pinTypes={pinTypes}
+        reps={reps}
+        armedPinId={armedPinId}
+        onArm={setArmedPinId}
+        actingRepId={actingRepId}
+        onActingRepChange={setActingRepId}
+      />
     </main>
   );
 }

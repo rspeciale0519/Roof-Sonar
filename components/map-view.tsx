@@ -5,6 +5,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { MapProperty } from "@/lib/types";
 import { ageBucket, roofAgeLabel } from "@/lib/types";
+import { nearestProperty } from "@/lib/canvassing";
 
 const LABEL_ZOOM = 16; // PRD: labels at zoom >= 16 only; dots/heat below
 const FETCH_ZOOM = 13; // below this the bbox is too big to be useful
@@ -25,6 +26,8 @@ interface Props {
   flyTo?: { lng: number; lat: number } | null;
   onOpenProperty: (id: number) => void;
   refreshTrigger?: number;
+  armedPinId?: number | null;
+  onPinDrop?: (propertyId: number, address: string) => void;
 }
 
 function toGeojson(ps: MapProperty[], selected: Set<number>): GeoJSON.FeatureCollection {
@@ -60,7 +63,7 @@ const BUCKET_COLOR: mapboxgl.ExpressionSpecification = [
   "#9ca3af", // unknown
 ];
 
-export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSelect, onViewport, flyTo, onOpenProperty, refreshTrigger }: Props) {
+export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSelect, onViewport, flyTo, onOpenProperty, refreshTrigger, armedPinId, onPinDrop }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const propertiesRef = useRef<MapProperty[]>([]);
@@ -71,6 +74,8 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
   const onToggleRef = useRef(onToggleSelect);
   const onBoxRef = useRef(onBoxSelect);
   const onOpenPropertyRef = useRef(onOpenProperty);
+  const armedPinRef = useRef(armedPinId ?? null);
+  const onPinDropRef = useRef(onPinDrop ?? null);
   const [zoom, setZoom] = useState(10);
   const [loading, setLoading] = useState(false);
   const [box, setBox] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
@@ -81,6 +86,8 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
   onToggleRef.current = onToggleSelect;
   onBoxRef.current = onBoxSelect;
   onOpenPropertyRef.current = onOpenProperty;
+  armedPinRef.current = armedPinId ?? null;
+  onPinDropRef.current = onPinDrop ?? null;
 
   // ----- init map once -----
   useEffect(() => {
@@ -182,6 +189,14 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
       });
 
       const clickHandler = (e: mapboxgl.MapMouseEvent) => {
+        if (armedPinRef.current != null) {
+          const target = nearestProperty(propertiesRef.current, e.lngLat.lng, e.lngLat.lat, 30);
+          if (target) {
+            const full = propertiesRef.current.find((p) => p.id === target.id);
+            if (full) onPinDropRef.current?.(full.id, full.situs_address);
+          }
+          return;
+        }
         const pinHit = map.queryRenderedFeatures(e.point, { layers: ["visit-pins"] })[0];
         if (pinHit?.properties?.payload) {
           onOpenPropertyRef.current((JSON.parse(pinHit.properties.payload as string) as MapProperty).id);
