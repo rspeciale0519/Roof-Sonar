@@ -50,6 +50,6 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
       rep_name: (n.sales_reps as unknown as { name: string } | null)?.name ?? null,
     })),
     tags: (tags ?? []).map((t) => t.tags),
-    routes: (routes ?? []).map((r) => r.routes),
+    routes: (routes ?? []).map((r) => r.routes).filter((r): r is NonNullable<typeof r> => r != null),
   });
 }

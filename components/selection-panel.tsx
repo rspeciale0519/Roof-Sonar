@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { X, Download, Map as MapIcon, Save, Flag, ExternalLink, Info } from "lucide-react";
 import type { MapProperty, SalesRep } from "@/lib/types";
-import { roofAgeLabel, OCCUPANCIES } from "@/lib/types";
+import { roofAgeLabel, occLabel } from "@/lib/types";
 import { nearestNeighborOrder } from "@/lib/route-order";
 import { routeCsv, googleMapsLinks, downloadFile } from "@/lib/export";
 
@@ -16,8 +16,6 @@ interface Props {
   onSaved: () => void;
   onOpenProperty: (id: number) => void;
 }
-
-const occLabel = (k: string) => OCCUPANCIES.find((o) => o.key === k)?.label ?? k;
 
 export default function SelectionPanel({ selection, startId, onStart, onRemove, onClear, onSaved, onOpenProperty }: Props) {
   const [name, setName] = useState("");

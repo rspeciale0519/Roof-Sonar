@@ -24,6 +24,7 @@ interface Props {
   onViewport: (ps: MapProperty[], zoom: number) => void;
   flyTo?: { lng: number; lat: number } | null;
   onOpenProperty: (id: number) => void;
+  refreshTrigger?: number;
 }
 
 function toGeojson(ps: MapProperty[], selected: Set<number>): GeoJSON.FeatureCollection {
@@ -59,7 +60,7 @@ const BUCKET_COLOR: mapboxgl.ExpressionSpecification = [
   "#9ca3af", // unknown
 ];
 
-export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSelect, onViewport, flyTo, onOpenProperty }: Props) {
+export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSelect, onViewport, flyTo, onOpenProperty, refreshTrigger }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const propertiesRef = useRef<MapProperty[]>([]);
@@ -147,7 +148,7 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
         type: "symbol",
         source: "properties",
         filter: ["==", ["get", "dnk"], true],
-        layout: { "text-field": "✕", "text-size": 12, "text-offset": [0, -2.6], "text-allow-overlap": true },
+        layout: { "text-field": "✕", "text-size": 12, "text-offset": [0, -5.4], "text-allow-overlap": true },
         paint: { "text-color": "#ffffff" },
       });
 
@@ -260,6 +261,11 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
     const map = mapRef.current as (mapboxgl.Map & { _rrRefresh?: () => void }) | null;
     map?._rrRefresh?.();
   }, [filters]);
+
+  // ----- Phase 5 refresh hook (triggered by parent after modal edits) -----
+  useEffect(() => {
+    (mapRef.current as (mapboxgl.Map & { _rrRefresh?: () => void }) | null)?._rrRefresh?.();
+  }, [refreshTrigger]);
 
   // ----- repaint selection -----
   useEffect(() => {

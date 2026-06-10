@@ -19,6 +19,7 @@ export default function MapApp() {
   const [savedRoutes, setSavedRoutes] = useState<SavedRoute[]>([]);
   const [flyTo, setFlyTo] = useState<{ lng: number; lat: number } | null>(null);
   const [modalPropertyId, setModalPropertyId] = useState<number | null>(null);
+  const [mapRefresh, setMapRefresh] = useState(0);
 
   const refreshRoutes = useCallback(async () => {
     const res = await fetch("/api/routes");
@@ -89,6 +90,7 @@ export default function MapApp() {
         onViewport={(ps) => setVisibleCount(ps.length)}
         flyTo={flyTo}
         onOpenProperty={setModalPropertyId}
+        refreshTrigger={mapRefresh}
       />
       <FilterSidebar
         filters={filters}
@@ -112,7 +114,11 @@ export default function MapApp() {
         onOpenProperty={setModalPropertyId}
       />
       {modalPropertyId != null && (
-        <PropertyModal propertyId={modalPropertyId} onClose={() => setModalPropertyId(null)} />
+        <PropertyModal
+          propertyId={modalPropertyId}
+          onClose={() => setModalPropertyId(null)}
+          onDataChanged={() => setMapRefresh((n) => n + 1)}
+        />
       )}
     </main>
   );

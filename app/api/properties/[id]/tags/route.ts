@@ -15,14 +15,11 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string 
   const propertyId = Number(id);
   const sb = supabaseAdmin();
 
-  const { error: delError } = await sb.from("property_tags").delete().eq("property_id", propertyId);
-  if (delError) return NextResponse.json({ error: delError.message }, { status: 500 });
-
-  if (tagIds.length > 0) {
-    const rows = tagIds.map((tag_id) => ({ property_id: propertyId, tag_id }));
-    const { error: insError } = await sb.from("property_tags").insert(rows);
-    if (insError) return NextResponse.json({ error: insError.message }, { status: 500 });
-  }
+  const { error: rpcError } = await sb.rpc("set_property_tags", {
+    p_property_id: propertyId,
+    p_tag_ids: tagIds,
+  });
+  if (rpcError) return NextResponse.json({ error: rpcError.message }, { status: 500 });
 
   const { data, error: selError } = await sb
     .from("property_tags")

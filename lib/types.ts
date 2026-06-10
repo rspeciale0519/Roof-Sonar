@@ -45,6 +45,8 @@ export function ageBucket(roofYear: number | null): AgeBucket {
   return "16+";
 }
 
+export const occLabel = (k: string) => OCCUPANCIES.find((o) => o.key === k)?.label ?? k;
+
 /** Map label line 2: "18 yrs" from a permit, else "orig. '94" from year_built. */
 export function roofAgeLabel(p: Pick<MapProperty, "roof_year" | "year_built">): string {
   if (p.roof_year != null) return `${new Date().getFullYear() - p.roof_year} yrs`;
