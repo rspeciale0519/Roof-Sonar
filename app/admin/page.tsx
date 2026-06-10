@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Calculator, Check } from "lucide-react";
+import { ArrowLeft, BarChart3, Calculator, Check, MapPin, Tag as TagIcon, Users } from "lucide-react";
+
+const ADMIN_LINKS = [
+  { href: "/admin/reps", label: "Sales reps", icon: Users },
+  { href: "/admin/pins", label: "Pin types", icon: MapPin },
+  { href: "/admin/tags", label: "Tags", icon: TagIcon },
+  { href: "/admin/metrics", label: "Knock metrics", icon: BarChart3 },
+];
 
 const PRESETS = [1.1, 1.2, 1.3, 1.4, 1.5];
 
@@ -53,6 +60,21 @@ export default function AdminPage() {
         <Link href="/map" className="mb-6 inline-flex items-center gap-1.5 text-sm text-ink-dim hover:text-accent">
           <ArrowLeft className="h-4 w-4" /> Back to map
         </Link>
+
+        <div className="mb-6 grid grid-cols-2 gap-3">
+          {ADMIN_LINKS.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="rr-panel flex items-center gap-3 p-4 transition-colors hover:border-accent/60"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/15">
+                <Icon className="h-4 w-4 text-accent" />
+              </div>
+              <span className="text-sm font-semibold">{label}</span>
+            </Link>
+          ))}
+        </div>
 
         <div className="rr-panel p-7">
           <div className="mb-6 flex items-center gap-3">
