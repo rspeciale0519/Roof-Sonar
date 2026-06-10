@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Radar, ChevronDown, Settings, FolderOpen, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { AGE_BUCKETS, OCCUPANCIES, SavedRoute, SalesRep, RouteStatus } from "@/lib/types";
+import { AGE_BUCKETS, OCCUPANCIES, USE_BUCKETS, SavedRoute, SalesRep, RouteStatus } from "@/lib/types";
 import { JURISDICTIONS, COUNTIES } from "@/lib/jurisdictions";
 import type { MapFilters } from "./map-view";
 
@@ -116,6 +116,30 @@ export default function FilterSidebar({ filters, onFilters, visibleCount, savedR
               onClick={() => onFilters({ ...filters, occupancies: [] })}
             >
               show all occupancy
+            </button>
+          )}
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-dim">Property type</h2>
+          <div className="flex flex-wrap gap-1.5">
+            {USE_BUCKETS.map((u) => (
+              <button
+                key={u.key}
+                className="rr-chip"
+                data-active={filters.uses.length === 0 || filters.uses.includes(u.key)}
+                onClick={() => onFilters({ ...filters, uses: toggle(filters.uses, u.key) })}
+              >
+                {u.label}
+              </button>
+            ))}
+          </div>
+          {filters.uses.length > 0 && (
+            <button
+              className="mt-1.5 text-[11px] text-accent hover:underline"
+              onClick={() => onFilters({ ...filters, uses: [] })}
+            >
+              show all types
             </button>
           )}
         </section>

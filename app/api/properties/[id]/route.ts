@@ -10,7 +10,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
     .select(
       "id, situs_address, street_number, roof_year, year_built, roofing_squares, owner_name, " +
       "owner_mailing_address, occupancy, homestead, last_permit_number, last_permit_date, do_not_knock, " +
-      "jurisdictions(name)"
+      "dor_use_code, jurisdictions(name)"
     )
     .eq("id", id)
     .single();

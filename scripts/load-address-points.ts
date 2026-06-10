@@ -21,6 +21,7 @@ interface Point {
   situs_address: string | null;
   lng: number;
   lat: number;
+  dor_use_code: string | null;
 }
 
 function arg(name: string, dflt: string): string {
@@ -28,7 +29,7 @@ function arg(name: string, dflt: string): string {
   return i >= 0 ? process.argv[i + 1] : dflt;
 }
 
-function fromGeojson(file: string, parcelCol: string, situsCol: string): Point[] {
+function fromGeojson(file: string, parcelCol: string, situsCol: string, useCol: string): Point[] {
   const fc = JSON.parse(fs.readFileSync(file, "utf8"));
   const out: Point[] = [];
   for (const f of fc.features ?? []) {
@@ -39,12 +40,13 @@ function fromGeojson(file: string, parcelCol: string, situsCol: string): Point[]
       situs_address: normalizeAddress(f.properties?.[situsCol]) || null,
       lng,
       lat,
+      dor_use_code: f.properties?.[useCol] ?? null,
     });
   }
   return out;
 }
 
-function fromCsv(file: string, parcelCol: string, situsCol: string, lngCol: string, latCol: string): Point[] {
+function fromCsv(file: string, parcelCol: string, situsCol: string, lngCol: string, latCol: string, useCol: string): Point[] {
   const rows = parse(fs.readFileSync(file), { columns: true, skip_empty_lines: true, trim: true, bom: true }) as Record<string, string>[];
   return rows
     .map((r) => ({
@@ -52,6 +54,7 @@ function fromCsv(file: string, parcelCol: string, situsCol: string, lngCol: stri
       situs_address: normalizeAddress(r[situsCol]) || null,
       lng: parseFloat(r[lngCol]),
       lat: parseFloat(r[latCol]),
+      dor_use_code: r[useCol] || null,
     }))
     .filter((p) => !isNaN(p.lng) && !isNaN(p.lat));
 }
@@ -67,10 +70,11 @@ async function main() {
   const situsCol = arg("--situs", "ADDRESS");
   const lngCol = arg("--lng", "LON");
   const latCol = arg("--lat", "LAT");
+  const useCol = arg("--usecode", "DOR_USE_CODE");
 
   const points = /\.(geojson|json)$/i.test(file)
-    ? fromGeojson(file, parcelCol, situsCol)
-    : fromCsv(file, parcelCol, situsCol, lngCol, latCol);
+    ? fromGeojson(file, parcelCol, situsCol, useCol)
+    : fromCsv(file, parcelCol, situsCol, lngCol, latCol, useCol);
   console.log(`${points.length} address points parsed; replacing ${county} staging rows…`);
 
   const client = db();

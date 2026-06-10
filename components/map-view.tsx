@@ -15,6 +15,7 @@ export interface MapFilters {
   jurisdictions: string[];
   ages: string[];
   occupancies: string[];
+  uses: string[];
 }
 
 interface Props {
@@ -242,6 +243,7 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
       if (f.jurisdictions.length) params.set("jurisdictions", f.jurisdictions.join(","));
       if (f.ages.length) params.set("ages", f.ages.join(","));
       if (f.occupancies.length) params.set("occupancies", f.occupancies.join(","));
+      if (f.uses.length) params.set("uses", f.uses.join(","));
 
       abortRef.current?.abort();
       const controller = new AbortController();

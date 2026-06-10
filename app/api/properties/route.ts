@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
     jurisdictions_: list("jurisdictions"),
     age_buckets: list("ages"),
     occupancies: list("occupancies"),
+    use_buckets: list("uses"),
     max_rows: 3000,
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

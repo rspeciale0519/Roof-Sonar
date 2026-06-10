@@ -16,7 +16,34 @@ export interface MapProperty {
   pin_label: string | null;
   pin_color: string | null;
   pin_knocked_at: string | null;
+  dor_use_code: string | null;
 }
+
+export type UseBucket = "single" | "condo" | "mobile" | "multi" | "vacant" | "other";
+
+export const USE_BUCKETS: { key: UseBucket; label: string }[] = [
+  { key: "single", label: "Single Family" },
+  { key: "condo", label: "Condo / Co-op" },
+  { key: "mobile", label: "Mobile Home" },
+  { key: "multi", label: "Multi-family" },
+  { key: "vacant", label: "Vacant Res." },
+  { key: "other", label: "Other / Unknown" },
+];
+
+/** FL DOR use code -> filter bucket; mirrors the CASE in properties_in_bbox. */
+export function useBucket(code: string | null): UseBucket {
+  switch ((code ?? "").slice(0, 2)) {
+    case "01": return "single";
+    case "02": return "mobile";
+    case "03": case "08": return "multi";
+    case "04": case "05": return "condo";
+    case "00": return "vacant";
+    default: return "other";
+  }
+}
+
+export const useBucketLabel = (code: string | null): string =>
+  USE_BUCKETS.find((b) => b.key === useBucket(code))?.label ?? "Other / Unknown";
 
 export type AgeBucket = "0-5" | "6-10" | "11-15" | "16+" | "unknown";
 
