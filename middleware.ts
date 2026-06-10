@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE, sessionToken, timingSafeEqual } from "@/lib/auth";
+// relative import on purpose: Vercel's edge-middleware bundler fails to
+// resolve the "@/" tsconfig alias ("referencing unsupported modules")
+import { SESSION_COOKIE, sessionToken, timingSafeEqual } from "./lib/auth";
 
 export async function middleware(req: NextRequest) {
   const password = process.env.APP_PASSWORD;
