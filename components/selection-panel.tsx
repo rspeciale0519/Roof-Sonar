@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { X, Download, Map as MapIcon, Save, Flag, ExternalLink } from "lucide-react";
+import { X, Download, Map as MapIcon, Save, Flag, ExternalLink, Info } from "lucide-react";
 import type { MapProperty, SalesRep } from "@/lib/types";
 import { roofAgeLabel, OCCUPANCIES } from "@/lib/types";
 import { nearestNeighborOrder } from "@/lib/route-order";
@@ -13,12 +13,13 @@ interface Props {
   onStart: (id: number) => void;
   onRemove: (id: number) => void;
   onClear: () => void;
-  onSaved: () => void; // refresh saved-routes list
+  onSaved: () => void;
+  onOpenProperty: (id: number) => void;
 }
 
 const occLabel = (k: string) => OCCUPANCIES.find((o) => o.key === k)?.label ?? k;
 
-export default function SelectionPanel({ selection, startId, onStart, onRemove, onClear, onSaved }: Props) {
+export default function SelectionPanel({ selection, startId, onStart, onRemove, onClear, onSaved, onOpenProperty }: Props) {
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [links, setLinks] = useState<string[] | null>(null);
@@ -103,6 +104,14 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
                 className={p.id === ordered[0].id ? "text-accent" : "text-ink-dim hover:text-accent"}
               >
                 <Flag className="h-3.5 w-3.5" />
+              </button>
+              <button
+                aria-label="Property details"
+                title="Property details"
+                onClick={() => onOpenProperty(p.id)}
+                className="text-ink-dim hover:text-accent"
+              >
+                <Info className="h-3.5 w-3.5" />
               </button>
               <button title="Remove stop" onClick={() => onRemove(p.id)} className="text-ink-dim hover:text-hot">
                 <X className="h-3.5 w-3.5" />

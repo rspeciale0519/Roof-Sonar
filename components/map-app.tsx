@@ -6,6 +6,7 @@ import type { MapProperty, SavedRoute } from "@/lib/types";
 import type { MapFilters } from "./map-view";
 import FilterSidebar from "./filter-sidebar";
 import SelectionPanel from "./selection-panel";
+import PropertyModal from "./property-modal";
 
 const MapView = dynamic(() => import("./map-view"), { ssr: false });
 
@@ -17,6 +18,7 @@ export default function MapApp() {
   const [startId, setStartId] = useState<number | null>(null);
   const [savedRoutes, setSavedRoutes] = useState<SavedRoute[]>([]);
   const [flyTo, setFlyTo] = useState<{ lng: number; lat: number } | null>(null);
+  const [modalPropertyId, setModalPropertyId] = useState<number | null>(null);
 
   const refreshRoutes = useCallback(async () => {
     const res = await fetch("/api/routes");
@@ -106,7 +108,11 @@ export default function MapApp() {
           setStartId(null);
         }}
         onSaved={refreshRoutes}
+        onOpenProperty={setModalPropertyId}
       />
+      {modalPropertyId != null && (
+        <PropertyModal propertyId={modalPropertyId} onClose={() => setModalPropertyId(null)} />
+      )}
     </main>
   );
 }
