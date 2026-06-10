@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X, Download, Map as MapIcon, Save, Flag, ExternalLink } from "lucide-react";
-import type { MapProperty } from "@/lib/types";
+import type { MapProperty, SalesRep } from "@/lib/types";
 import { roofAgeLabel, OCCUPANCIES } from "@/lib/types";
 import { nearestNeighborOrder } from "@/lib/route-order";
 import { routeCsv, googleMapsLinks, downloadFile } from "@/lib/export";
@@ -22,6 +22,16 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [links, setLinks] = useState<string[] | null>(null);
+  const [reps, setReps] = useState<SalesRep[]>([]);
+  const [repId, setRepId] = useState<number | "">("");
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/reps")
+      .then((r) => r.json())
+      .then((j) => setReps(j.reps ?? []))
+      .catch(() => undefined);
+  }, []);
 
   const ordered = useMemo(() => nearestNeighborOrder(selection, startId ?? undefined), [selection, startId]);
 
@@ -29,17 +39,25 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
 
   async function saveRoute() {
     setSaving(true);
+    setSaveError(null);
+    const body: { name: string; property_ids: number[]; rep_id?: number } = {
+      name: name || `Route ${new Date().toLocaleDateString()}`,
+      property_ids: ordered.map((p) => p.id),
+    };
+    if (repId !== "") body.rep_id = repId;
     const res = await fetch("/api/routes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name || `Route ${new Date().toLocaleDateString()}`, property_ids: ordered.map((p) => p.id) }),
+      body: JSON.stringify(body),
     });
     setSaving(false);
     if (res.ok) {
       setName("");
+      setRepId("");
       onSaved();
     } else {
-      alert(`Save failed: ${(await res.json()).error ?? res.status}`);
+      const j = (await res.json()) as { error?: string };
+      setSaveError(j.error ?? `Save failed (${res.status})`);
     }
   }
 
@@ -91,6 +109,17 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
 
       <div className="space-y-2.5 border-t border-line/60 px-4 py-3">
         <input className="rr-input" placeholder="Route name (e.g. Deltona NE — Tuesday)" value={name} onChange={(e) => setName(e.target.value)} />
+        <select
+          className="rr-input"
+          value={repId}
+          onChange={(e) => setRepId(e.target.value === "" ? "" : Number(e.target.value))}
+        >
+          <option value="">Unassigned</option>
+          {reps.map((r) => (
+            <option key={r.id} value={r.id}>{r.name}</option>
+          ))}
+        </select>
+        {saveError && <p className="text-[12px] text-hot">{saveError}</p>}
         <div className="grid grid-cols-3 gap-2">
           <button className="rr-btn rr-btn-primary" onClick={exportCsv}>
             <Download className="h-3.5 w-3.5" /> CSV

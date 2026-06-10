@@ -94,6 +94,7 @@ export default function MapApp() {
         savedRoutes={savedRoutes}
         onOpenRoute={openRoute}
         onDeleteRoute={deleteRoute}
+        onRefreshRoutes={refreshRoutes}
       />
       <SelectionPanel
         selection={[...selection.values()]}
