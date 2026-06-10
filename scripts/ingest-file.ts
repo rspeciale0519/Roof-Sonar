@@ -3,16 +3,16 @@
  *
  *   npm run ingest:file -- <jurisdiction-slug> data/inbox/<slug>/permits.csv
  *
- * Reads CSV or XLSX. Column mapping + roof-filter rules live in
- * ingest/configs/<slug>.json (see ingest/configs/_example.json). PDF reports:
- * extract tables first (e.g. pdfplumber) to CSV, then run this.
+ * Reads CSV. Column mapping + roof-filter rules live in
+ * ingest/configs/<slug>.json (see ingest/configs/_example.json). XLSX or PDF
+ * reports: export/extract to CSV first (agencies can export CSV; for PDFs use
+ * e.g. pdfplumber), then run this.
  * Originals are archived to data/processed/<slug>/ after a successful run;
  * every raw row is preserved in raw_permits.
  */
 import fs from "node:fs";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
-import * as XLSX from "xlsx";
 import { jurisdictionId, startRun, finishRun, insertRawPermits, upsertPermitProperties, PermitUpsert } from "./lib/db";
 import { normalizeAddress, streetNumber } from "./lib/normalize";
 
@@ -34,9 +34,8 @@ interface FileConfig {
 
 function readRows(file: string): Record<string, string>[] {
   if (/\.(xlsx|xls)$/i.test(file)) {
-    const wb = XLSX.readFile(file);
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    return XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { raw: false, defval: "" });
+    console.error("XLSX is no longer supported (vulnerable dependency removed). Export the file to CSV and re-run.");
+    process.exit(1);
   }
   return parse(fs.readFileSync(file), {
     columns: true,
@@ -61,7 +60,7 @@ function parseDate(value: string, format: FileConfig["date_format"]): string | n
 async function main() {
   const [slug, file] = process.argv.slice(2);
   if (!slug || !file) {
-    console.error("Usage: npm run ingest:file -- <jurisdiction-slug> <path/to/file.csv|xlsx>");
+    console.error("Usage: npm run ingest:file -- <jurisdiction-slug> <path/to/file.csv>");
     process.exit(1);
   }
   const configPath = path.join("ingest", "configs", `${slug}.json`);
