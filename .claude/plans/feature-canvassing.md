@@ -917,7 +917,7 @@ map.addLayer({
   type: "symbol",
   source: "properties",
   filter: ["==", ["get", "dnk"], true],
-  layout: { "text-field": "✕", "text-size": 12, "text-offset": [0, -2.6], "text-allow-overlap": true },
+  layout: { "text-field": "✕", "text-size": 12, "text-offset": [0, -5.4], "text-allow-overlap": true }, // raised to sit on the translated pin circle (Phase 4 review fix 8)
   paint: { "text-color": "#ffffff" },
 });
 ```

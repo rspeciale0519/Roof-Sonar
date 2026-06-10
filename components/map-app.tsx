@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { MapProperty, PinType, SalesRep, SavedRoute } from "@/lib/types";
 import type { MapFilters } from "./map-view";
@@ -33,6 +33,7 @@ export default function MapApp() {
   const [actingRepId, setActingRepId] = useState<number | null>(null);
   const [undo, setUndo] = useState<UndoState | null>(null);
   const [pinDropError, setPinDropError] = useState<string | null>(null);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     fetch("/api/pin-types")
@@ -53,6 +54,10 @@ export default function MapApp() {
   useEffect(() => {
     void refreshRoutes();
   }, [refreshRoutes]);
+
+  useEffect(() => () => {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+  }, []);
 
   const toggleSelect = useCallback((p: MapProperty) => {
     setSelection((prev) => {
@@ -120,10 +125,15 @@ export default function MapApp() {
           setPinDropError(j.error ?? `Drop failed (${res.status})`);
           return;
         }
-        const visitId = j.visit_id!;
+        if (!j.visit_id) {
+          setPinDropError("Drop failed — try again");
+          return;
+        }
+        const visitId = j.visit_id;
         setUndo({ visitId, label: pin.label, address });
         setMapRefresh((n) => n + 1);
-        setTimeout(() => setUndo((u) => (u?.visitId === visitId ? null : u)), 10000);
+        if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+        undoTimerRef.current = setTimeout(() => setUndo((u) => (u?.visitId === visitId ? null : u)), 10000);
       } catch {
         setPinDropError("Network error — try again");
       }
@@ -189,7 +199,7 @@ export default function MapApp() {
       )}
 
       {(undo || pinDropError) && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-28 z-40 flex flex-col items-center gap-2">
+        <div className="pointer-events-none absolute inset-x-0 bottom-36 z-40 flex flex-col items-center gap-2">
           {pinDropError && (
             <div className="pointer-events-auto rr-panel flex items-center gap-3 px-4 py-2 text-[13px] text-hot">
               <span>{pinDropError}</span>
