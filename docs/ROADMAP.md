@@ -18,7 +18,7 @@
 - [x] Phase 3 — Route assignment + lifecycle (rep, status, DNK hard filter) (2026-06-10)
 - [x] Phase 4 — Property modal + pin layer (read path) (2026-06-10)
 - [x] Phase 5 — Pin drop flow (tray, snap, undo) + GPS follow-me (2026-06-10)
-- [ ] Phase 6 — Knock metrics dashboard
+- [x] Phase 6 — Knock metrics dashboard + mobile responsiveness pass (2026-06-10)
 
 ## Backlog (not yet planned)
 
