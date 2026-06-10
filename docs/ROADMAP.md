@@ -27,4 +27,6 @@
 - [ ] Remaining 37 jurisdiction ingests (records requests → file adapter)
 - [ ] Load county address points + run geocode join (Orlando: 54k of 60k properties lack coordinates — only ~9% of Socrata history is pre-geocoded)
 - [ ] NAL owner-roll load (occupancy + building sqft → roofing squares)
-- [ ] Vercel deploy
+- [x] Vercel deploy — live at roof-sonar.vercel.app, project robs-projects-c72886ba/roof-sonar (2026-06-10)
+- [ ] Point roofsonar.com at the Vercel project (DNS at Cloudflare)
+- [ ] Set GitHub Actions repo secrets so the monthly ingest cron runs (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SOCRATA_APP_TOKEN)
