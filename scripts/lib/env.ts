@@ -1,4 +1,7 @@
-import "dotenv/config";
+import { config } from "dotenv";
+
+config({ path: ".env.local" });
+config(); // .env fallback; existing vars are never overwritten
 
 export function requireEnv(name: string): string {
   const value = process.env[name];

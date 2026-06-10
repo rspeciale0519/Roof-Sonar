@@ -7,16 +7,24 @@
  *   npm run ingest:volusia-api -- --test           # fetch + analyze roof-filtered sample, NO db writes
  *   npm run ingest:volusia-api                     # ingest roof permits currently open
  *
- * Geometry: parcel polygons in WKID 2881 — we ask the server for centroids in
- * 4326 (returnCentroid + outSR) so no client-side reprojection is needed.
+ * Geometry: parcel polygons in WKID 2881, reprojected server-side to 4326 via
+ * outSR. This MapServer ignores returnCentroid, so we compute the centroid
+ * client-side from the polygon's bounding box.
+ *
+ * Field mapping (verified against live records 2026-06-09):
+ *   FOLDERNAME      = situs address + ", CITY ZIP" tail (e.g. "1621 GLENWOOD Road, DELAND 32720")
+ *   REFERENCEFILE   = permit number (e.g. "20260226007")
+ *   FOLDERDESCRIPTION = free-text scope of work
  */
 import { jurisdictionId, startRun, finishRun, insertRawPermits, upsertPermitProperties, PermitUpsert } from "./lib/db";
 import { normalizeAddress, streetNumber } from "./lib/normalize";
 
 const LAYER = "https://maps5.vcgov.org/arcgis/rest/services/CurrentProjects/MapServer/1/query";
 const PAGE_SIZE = 1000;
-// Candidate roof vocabulary — confirm against --verify-vocab output before trusting.
-const ROOF_WHERE = `UPPER(FOLDERDESCRIPTION) LIKE '%ROOF%' OR UPPER(FOLDERNAME) LIKE '%ROOF%'`;
+// Verified via --verify-vocab (2026-06-09): AMANDA uses a dedicated ROOF folder
+// type. Description LIKE '%ROOF%' was too noisy — it matched roof-mounted solar,
+// remodels with roof scope, fire repairs, etc.
+const ROOF_WHERE = `FOLDERTYPE = 'ROOF'`;
 const EXCLUDED_STATUS = /withdrawn|void|cancel|denied|revoked|closed/i;
 
 interface VolusiaAttrs {
@@ -26,14 +34,32 @@ interface VolusiaAttrs {
   INDATE?: number | string; // epoch ms in ArcGIS JSON
   STATUSDESC?: string;
   PID?: string;
-  ADDRESS?: string;
-  SITEADDRESS?: string;
+  REFERENCEFILE?: string;
   [k: string]: unknown;
 }
 
 interface VolusiaFeature {
   attributes: VolusiaAttrs;
-  centroid?: { x: number; y: number };
+  geometry?: { rings?: number[][][] };
+}
+
+/** Bbox midpoint of the parcel polygon's outer ring — close enough for a pin. */
+function ringCentroid(geometry?: { rings?: number[][][] }): { x: number; y: number } | null {
+  const ring = geometry?.rings?.[0];
+  if (!ring || ring.length === 0) return null;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const [x, y] of ring) {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
+  return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+}
+
+/** "1621 GLENWOOD Road, DELAND 32720" -> "1621 GLENWOOD Road" */
+function stripCityZip(folderName: string): string {
+  return folderName.replace(/,\s*[A-Z .'-]+\s+\d{5}(-\d{4})?\s*$/i, "");
 }
 
 async function arcgis(params: Record<string, string>): Promise<Record<string, unknown>> {
@@ -53,12 +79,13 @@ async function verifyVocab(): Promise<void> {
 
   for (const field of ["FOLDERTYPE", "FOLDERDESCRIPTION"]) {
     console.log(`\nDistinct ${field} values:`);
+    // NB: this server 400s on returnDistinctValues + resultRecordCount unless
+    // orderByFields is also set, so let it return the full distinct set.
     const json = (await arcgis({
       where: "1=1",
       outFields: field,
       returnDistinctValues: "true",
       returnGeometry: "false",
-      resultRecordCount: "500",
     })) as { features?: { attributes: Record<string, string> }[] };
     const values = (json.features ?? []).map((f) => f.attributes[field]).filter(Boolean).sort();
     for (const v of values) {
@@ -75,8 +102,7 @@ async function fetchRoofPage(offset: number): Promise<VolusiaFeature[]> {
   const json = (await arcgis({
     where: ROOF_WHERE,
     outFields: "*",
-    returnGeometry: "false",
-    returnCentroid: "true",
+    returnGeometry: "true",
     outSR: "4326",
     resultOffset: String(offset),
     resultRecordCount: String(PAGE_SIZE),
@@ -87,20 +113,20 @@ async function fetchRoofPage(offset: number): Promise<VolusiaFeature[]> {
 function toPermit(f: VolusiaFeature): PermitUpsert | null {
   const a = f.attributes;
   if (a.STATUSDESC && EXCLUDED_STATUS.test(a.STATUSDESC)) return null;
-  const situsRaw = (a.ADDRESS ?? a.SITEADDRESS ?? "") as string;
-  const situs = normalizeAddress(situsRaw);
+  const situs = normalizeAddress(stripCityZip(a.FOLDERNAME ?? ""));
   if (!situs) return null;
   const inDate = typeof a.INDATE === "number" ? new Date(a.INDATE) : a.INDATE ? new Date(a.INDATE) : null;
   if (!inDate || isNaN(inDate.getTime())) return null;
+  const centroid = ringCentroid(f.geometry);
   return {
     parcel_number: a.PID ?? null,
     situs_address: situs,
     street_number: streetNumber(situs),
-    lng: f.centroid?.x ?? null,
-    lat: f.centroid?.y ?? null,
-    permit_number: a.FOLDERNAME ?? null,
+    lng: centroid?.x ?? null,
+    lat: centroid?.y ?? null,
+    permit_number: a.REFERENCEFILE ?? null,
     permit_date: inDate.toISOString().slice(0, 10),
-    geocode_method: f.centroid ? "parcel_centroid" : null,
+    geocode_method: centroid ? "parcel_centroid" : null,
   };
 }
 
