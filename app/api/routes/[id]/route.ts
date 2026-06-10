@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import type { RouteStatus } from "@/lib/types";
 
 /** Re-open a saved route with full stop details, in stop order. */
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -40,17 +41,30 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
+  const routeId = Number(id);
   const body = (await req.json().catch(() => null)) as { rep_id?: number | null } | null;
   if (!body || body.rep_id === undefined) return NextResponse.json({ error: "rep_id required" }, { status: 400 });
   const sb = supabaseAdmin();
+
+  // Fix 1: preserve status for in_progress/completed routes on reassignment
+  const { data: current } = await sb.from("routes").select("status").eq("id", id).single();
+  const currentStatus = (current as { status: RouteStatus } | null)?.status;
+  const preserveStatus = currentStatus === "in_progress" || currentStatus === "completed";
+  const newStatus: RouteStatus = preserveStatus ? currentStatus : body.rep_id ? "assigned" : "draft";
+
   const { data, error } = await sb
     .from("routes")
-    .update({ rep_id: body.rep_id, status: body.rep_id ? "assigned" : "draft" })
+    .update({ rep_id: body.rep_id, status: newStatus })
     .eq("id", id)
     .select("id, status, rep_id")
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (body.rep_id) await sb.from("route_assignments").insert({ route_id: Number(id), rep_id: body.rep_id });
+
+  // Fix 2 & 3: log history insert errors; use routeId (number) for the insert payload
+  if (body.rep_id) {
+    const { error: histErr } = await sb.from("route_assignments").insert({ route_id: routeId, rep_id: body.rep_id });
+    if (histErr) console.error("route_assignments history insert failed:", histErr.message);
+  }
   return NextResponse.json({ route: data });
 }
 

@@ -53,6 +53,10 @@ export async function POST(req: NextRequest) {
     await sb.from("routes").delete().eq("id", route.id);
     return NextResponse.json({ error: stopsError.message }, { status: 500 });
   }
-  if (body.rep_id) await sb.from("route_assignments").insert({ route_id: route.id, rep_id: body.rep_id });
+  // Fix 2: capture and log history insert errors instead of silently swallowing them
+  if (body.rep_id) {
+    const { error: histErr } = await sb.from("route_assignments").insert({ route_id: route.id, rep_id: body.rep_id });
+    if (histErr) console.error("route_assignments history insert failed:", histErr.message);
+  }
   return NextResponse.json({ id: route.id });
 }
