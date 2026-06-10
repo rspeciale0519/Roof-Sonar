@@ -164,17 +164,19 @@ def _extract_new_world_records(words):
         else:
             description = "ROOF"
 
-        if permit_number and address and date_str:
-            records.append(
-                {
-                    "PERMIT_NUMBER": permit_number,
-                    "PARCEL_NUMBER": parcel,
-                    "ADDRESS": address,
-                    "ISSUE_DATE": date_str,
-                    "STATUS": status,
-                    "DESCRIPTION": description,
-                }
-            )
+        # Emit even when address/date is blank in the source report (e.g.
+        # 2024-00000225 has no address cell) — the ingest flags such rows
+        # LOW CONFIDENCE instead of silently dropping them.
+        records.append(
+            {
+                "PERMIT_NUMBER": permit_number,
+                "PARCEL_NUMBER": parcel,
+                "ADDRESS": address,
+                "ISSUE_DATE": date_str,
+                "STATUS": status,
+                "DESCRIPTION": description,
+            }
+        )
 
     return records
 
@@ -306,16 +308,17 @@ def _energov_record_from_column(pw, col_words):
     )
     description = f"{workclass}: {desc_text}" if workclass and desc_text else (workclass or desc_text)
 
-    if permit_number and address and issue_date:
-        return {
-            "PERMIT_NUMBER": permit_number,
-            "PARCEL_NUMBER": parcel,
-            "ADDRESS": address,
-            "ISSUE_DATE": issue_date,
-            "STATUS": status,
-            "DESCRIPTION": description,
-        }
-    return None
+    # Emit even when address/date is blank (most Right of Way rows have no
+    # Main Address) — non-roof rows are dropped by the ingest roof_filter and
+    # incomplete roof rows are flagged LOW CONFIDENCE, never silently lost.
+    return {
+        "PERMIT_NUMBER": permit_number,
+        "PARCEL_NUMBER": parcel,
+        "ADDRESS": address,
+        "ISSUE_DATE": issue_date,
+        "STATUS": status,
+        "DESCRIPTION": description,
+    }
 
 
 def extract_energov(pdf_path):
