@@ -1,4 +1,6 @@
-# RoofRadar — PRD v4 (Tri-County Complete + Owner/Rental Intelligence)
+# RoofSonar — PRD v4 (Tri-County Complete + Owner/Rental Intelligence)
+
+> Renamed from RoofRadar on 2026-06-10 (domain: roofsonar.com).
 
 Internal roofing-sales tool. Satellite map covering **all of Seminole, Volusia, and Orange Counties** (every municipality + unincorporated areas), showing each house’s street number and roof age overlaid on the roof, derived from public roofing permit records — plus **owner name and owner-occupied vs. rental classification** from property appraiser rolls. Sales manager selects houses and exports ordered door-knocking routes. Data refreshes monthly.
 
@@ -214,11 +216,11 @@ Next.js (App Router) + Supabase (Postgres/PostGIS) + Mapbox GL JS + Vercel + Git
 ## Claude Code Starter Prompt
 
 ```
-Read roof-radar-prd.md in the repo root — it is the source of truth.
+Read PRD.md in the repo root — it is the source of truth.
 
-Build RoofRadar per the PRD. Sequence:
+Build RoofSonar per the PRD. Sequence:
 
-1. git init; gh repo create roof-radar --private --source=. --push
+1. git init; gh repo create roof-sonar --private --source=. --push
 2. Next.js scaffold + Supabase schema (enable PostGIS)
 3. scripts/ingest-orlando.ts (verified Socrata endpoint) — test $limit=1000,
    show me results, ask before full backfill

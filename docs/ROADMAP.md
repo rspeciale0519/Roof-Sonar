@@ -1,4 +1,6 @@
-# RoofRadar Development Roadmap
+# RoofSonar Development Roadmap
+
+> Renamed from RoofRadar on 2026-06-10 (domain: roofsonar.com).
 
 ## Completed
 
@@ -23,5 +25,6 @@
 - [ ] Rep-facing app (Supabase Auth roles, assigned-routes-only view, offline tolerance, geostamped knocks)
 - [ ] Pin-type icons on map markers; suggested tags by usage; per-rep daily knock goals
 - [ ] Remaining 37 jurisdiction ingests (records requests → file adapter)
+- [ ] Load county address points + run geocode join (Orlando: 54k of 60k properties lack coordinates — only ~9% of Socrata history is pre-geocoded)
 - [ ] NAL owner-roll load (occupancy + building sqft → roofing squares)
 - [ ] Vercel deploy

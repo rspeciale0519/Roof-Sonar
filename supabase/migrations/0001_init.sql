@@ -1,4 +1,4 @@
--- RoofRadar initial schema (Supabase / Postgres + PostGIS)
+-- RoofSonar (née RoofRadar) initial schema (Supabase / Postgres + PostGIS)
 -- Apply with: supabase db push, or psql -f against your Supabase database.
 
 create extension if not exists postgis;

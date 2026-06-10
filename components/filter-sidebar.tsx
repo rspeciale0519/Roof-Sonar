@@ -64,7 +64,7 @@ export default function FilterSidebar({ filters, onFilters, visibleCount, savedR
           <Radar className="h-4.5 w-4.5 text-accent" />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="text-sm font-bold leading-tight tracking-tight">RoofRadar</h1>
+          <h1 className="text-sm font-bold leading-tight tracking-tight">RoofSonar</h1>
           <p className="truncate text-[11px] text-ink-dim">{visibleCount.toLocaleString()} houses in view</p>
         </div>
         <Link href="/admin" title="Admin settings" className="text-ink-dim transition-colors hover:text-accent">

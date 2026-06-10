@@ -68,7 +68,7 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
 
   function exportCsv() {
     const safeName = (name || "route").replace(/[^\w-]+/g, "-").toLowerCase();
-    downloadFile(`roofradar-${safeName}-${new Date().toISOString().slice(0, 10)}.csv`, routeCsv(ordered));
+    downloadFile(`roofsonar-${safeName}-${new Date().toISOString().slice(0, 10)}.csv`, routeCsv(ordered));
   }
 
   return (

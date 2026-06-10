@@ -4,7 +4,7 @@
 >
 > **Git workflow (CLAUDE.md Rule 8):** run `/git-workflow-planning:start feature canvassing` before any code. After each phase: update the roadmap (Rule 7), then `/git-workflow-planning:checkpoint <N> <desc>`. After the last phase: `/git-workflow-planning:finish`.
 
-**Goal:** Turn RoofRadar from a lead-finding map into a canvassing ops tool: admin manages sales reps, assigns saved routes to them, and tracks per-door visit outcomes ("pins") with notes, tags, and knock metrics.
+**Goal:** Turn RoofSonar (formerly RoofRadar) from a lead-finding map into a canvassing ops tool: admin manages sales reps, assigns saved routes to them, and tracks per-door visit outcomes ("pins") with notes, tags, and knock metrics.
 
 **Architecture:** One new migration adds reps / pin_types / tags / visits / property_notes / route assignment + lifecycle, an extended `properties_in_bbox` RPC (latest non-expired pin per property), and a `record_visit` RPC that atomically handles the DNK flag and route status. All data flows through service-role API routes behind the existing password middleware (same pattern as `/api/routes`). UI: three small admin CRUD pages, a pin tray on the map (arm pin → tap house), a pin layer above house labels, and a property modal (details, visit timeline, notes, tags).
 
