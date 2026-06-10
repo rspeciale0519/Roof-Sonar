@@ -34,7 +34,7 @@ create table if not exists visits (
   id           bigserial primary key,
   property_id  bigint not null references properties (id) on delete cascade,
   route_id     bigint references routes (id) on delete set null,
-  rep_id       bigint references sales_reps (id),
+  rep_id       bigint references sales_reps (id),   -- no on-delete: reps are soft-deactivated, never hard-deleted
   pin_type_id  int not null references pin_types (id),
   note         text,
   knocked_at   timestamptz not null default now(),
@@ -127,6 +127,9 @@ begin
     update routes set status = 'in_progress'
     where id = p_route_id and status in ('draft', 'assigned');
 
+    -- NOTE: completion check is best-effort under concurrency (READ COMMITTED):
+    -- two reps finishing a route simultaneously can leave it 'in_progress'.
+    -- Status is dashboard-only; acceptable for an internal tool.
     select count(*) into v_open
     from route_stops rs
     where rs.route_id = p_route_id
@@ -141,6 +144,7 @@ end;
 $$;
 
 -- undo_visit: delete + recompute the DNK flag from remaining history.
+-- Deliberately does not revert route status (status is non-load-bearing).
 create or replace function undo_visit(p_visit_id bigint)
 returns void
 language plpgsql
@@ -253,6 +257,8 @@ $$;
 -- ---------------------------------------------------------------------------
 -- rep_knock_stats: doors knocked / contacts / leads per rep over a window,
 -- plus route assignment + completion counts.
+-- leads is a subset of contacts (every lead pin also counts_as_contact);
+-- intended rates: contacts/doors_knocked, leads/contacts.
 -- ---------------------------------------------------------------------------
 create or replace function rep_knock_stats(p_days int default 7)
 returns table (
