@@ -1,0 +1,14 @@
+{
+  "_comment": "Copy to <jurisdiction-slug>.json and map that city's report columns. roof_filter runs against columns.work_description; verify each city's vocabulary (RE-ROOF, REROOF, ROOFING, RFG...) before first import.",
+  "columns": {
+    "permit_number": "Permit Number",
+    "parcel_number": "Parcel ID",
+    "situs_address": "Site Address",
+    "issue_date": "Issue Date",
+    "status": "Status",
+    "work_description": "Work Description"
+  },
+  "roof_filter": "ROOF|RE-?ROOF|RFG",
+  "excluded_status": "withdrawn|void|cancel|denied|revoked",
+  "date_format": "us"
+}

@@ -1,0 +1,59 @@
+name: Annual NAL owner-roll refresh
+
+# FL DOR publishes final rolls in late summer. The portal's file URLs change
+# yearly, so this is a reminder + manual dispatch: grab the current NAL zip
+# URLs from floridarevenue.com/property/dataportal and pass them in.
+on:
+  schedule:
+    - cron: "0 9 1 9 *" # Sep 1 — opens a reminder issue
+  workflow_dispatch:
+    inputs:
+      seminole_url:
+        description: "NAL zip URL for Seminole (county 69)"
+        required: false
+      volusia_url:
+        description: "NAL zip URL for Volusia (county 74)"
+        required: false
+      orange_url:
+        description: "NAL zip URL for Orange (county 58)"
+        required: false
+
+jobs:
+  remind:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "Annual NAL refresh due — run the annual-nal workflow",
+              body: "Grab this year's NAL zips (counties 69/74/58) from https://floridarevenue.com/property/dataportal and dispatch the 'Annual NAL owner-roll refresh' workflow with the URLs."
+            });
+
+  ingest:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Seminole
+        if: inputs.seminole_url != ''
+        run: npm run ingest:nal -- seminole --url "${{ inputs.seminole_url }}"
+      - name: Volusia
+        if: always() && inputs.volusia_url != ''
+        run: npm run ingest:nal -- volusia --url "${{ inputs.volusia_url }}"
+      - name: Orange
+        if: always() && inputs.orange_url != ''
+        run: npm run ingest:nal -- orange --url "${{ inputs.orange_url }}"
