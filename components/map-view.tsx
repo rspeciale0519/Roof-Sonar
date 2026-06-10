@@ -161,7 +161,10 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
           "text-size": 16,
           "text-offset": [0, -1.05],
           "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-          "text-allow-overlap": false,
+          // pure overlay on the 3-line label's first line: must neither hide
+          // when overlapping it nor knock it out of collision placement
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
         },
         paint: {
           "text-color": "#ffffff",
