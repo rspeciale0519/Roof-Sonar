@@ -327,7 +327,7 @@ export default function PropertyModal({ propertyId, onClose }: Props) {
               )}
               {noteError && <p className="mb-1 text-[11px] text-hot">{noteError}</p>}
               <textarea
-                className="rr-input min-h-[72px] resize-y text-base md:text-[14px]"
+                className="rr-input min-h-[72px] resize-y"
                 placeholder="Add a note…"
                 value={noteBody}
                 onChange={(e) => setNoteBody(e.target.value)}
