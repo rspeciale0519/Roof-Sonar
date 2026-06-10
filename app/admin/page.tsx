@@ -6,6 +6,10 @@ import { ArrowLeft, Calculator, Check } from "lucide-react";
 
 const PRESETS = [1.1, 1.2, 1.3, 1.4, 1.5];
 
+// settings.roof_slope_multiplier is a Postgres real; round away float32 noise
+// (1.3 comes back as 1.2999999523162842, breaking display + chip highlighting).
+const round2 = (v: number) => Math.round(v * 100) / 100;
+
 export default function AdminPage() {
   const [multiplier, setMultiplier] = useState<number | null>(null);
   const [draft, setDraft] = useState("1.30");
@@ -17,8 +21,8 @@ export default function AdminPage() {
     fetch("/api/settings")
       .then((r) => r.json())
       .then((j) => {
-        setMultiplier(j.roof_slope_multiplier);
-        setDraft(String(j.roof_slope_multiplier));
+        setMultiplier(round2(j.roof_slope_multiplier));
+        setDraft(String(round2(j.roof_slope_multiplier)));
       })
       .catch(() => setError("Could not load settings — is Supabase configured?"));
   }, []);
@@ -38,8 +42,8 @@ export default function AdminPage() {
       setError(json.error ?? "Save failed");
       return;
     }
-    setMultiplier(json.roof_slope_multiplier);
-    setDraft(String(json.roof_slope_multiplier));
+    setMultiplier(round2(json.roof_slope_multiplier));
+    setDraft(String(round2(json.roof_slope_multiplier)));
     setResult(`Saved — roofing squares recalculated on ${json.recalculated.toLocaleString()} properties.`);
   }
 
