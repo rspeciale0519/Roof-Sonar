@@ -1050,6 +1050,31 @@ if (armedPinRef.current != null) {
 - [ ] **Step 4:** Browser verify the full loop at the DeLand cluster: arm "Not Home" → tap the 1621 house → gray pin appears above the label, undo toast shows the address; tap two more houses (pin stays armed); hit Undo on the last one → its pin disappears. Arm "Do Not Knock" → tap a house → `✕` mark renders; now try saving a route containing that house → API returns the 422 DNK error in the UI.
 - [ ] **Step 5:** `npm run test && npx tsc --noEmit && npm run lint` — clean.
 
+### Task 5.3: GPS follow-me mode
+
+**Files:** Modify `components/map-view.tsx` (one control)
+
+Reps walk neighborhoods with the phone in hand — the map must track their position continuously like Apple/Google Maps, not just one-shot center on demand.
+
+- [ ] **Step 1:** Replace the current `GeolocateControl` construction (`map-view.tsx:91`, currently `trackUserLocation: false`) with:
+
+```ts
+map.addControl(
+  new mapboxgl.GeolocateControl({
+    positionOptions: { enableHighAccuracy: true },
+    trackUserLocation: true,
+    showUserHeading: true,
+    showAccuracyCircle: false,
+  }),
+  "bottom-right"
+);
+```
+
+`trackUserLocation: true` makes the control a toggle: first tap centers + follows (camera pans as the user moves), pan-away switches to passive puck, re-tap resumes following. `showUserHeading` renders the direction cone on mobile (device orientation). Accuracy circle off — it reads as clutter over parcel pins at z16+.
+
+- [ ] **Step 2:** Verify with chrome-devtools MCP: `emulate` geolocation at `29.0711x-81.3440`, click the geolocate control → map flies there and the control shows the active/tracking state; change emulated geolocation to `29.0720x-81.3440` → the camera follows to the new position without re-clicking. (Heading cone can't be emulated in desktop Chrome — confirm no console errors only.)
+- [ ] **Step 3:** `npx tsc --noEmit && npm run lint` — clean.
+
 ### Phase 5 checkpoint
 
 - [ ] Update roadmap. `/git-workflow-planning:checkpoint 5 pin tray drop flow with undo`
@@ -1079,6 +1104,20 @@ export async function GET(req: NextRequest) {
 - [ ] **Step 2:** `app/admin/metrics/page.tsx` — window chips (Today=1 / 7 / 30 / 90 days) and a table: Rep · Doors knocked · Contacts (and rate = contacts/knocked) · Leads (and rate = leads/contacts) · Routes (completed/assigned). Plain numbers, `rr-panel` table, no chart library. Empty state: "No knocks recorded yet."
 - [ ] **Step 3:** Verify: drop 3 pins as "Test Rep" (one Not Home, one Interested), open `/admin/metrics` → knocked 3, contacts 2, leads 1.
 - [ ] **Step 4:** `npx tsc --noEmit && npm run lint && npm run build` — clean build.
+
+### Task 6.2: Mobile responsiveness pass
+
+**Files:** Modify `components/filter-sidebar.tsx`, `components/map-app.tsx`, `components/selection-panel.tsx`, `components/pin-tray.tsx`, `components/property-modal.tsx`, `app/admin/*/page.tsx` (as needed)
+
+Reps use phones (some tablets). Every rep-facing surface must work one-handed on a ~390px viewport; admin pages must be usable on a tablet. This is an audit-and-fix pass over everything this plan built:
+
+- [ ] **Step 1: Map page on phones.** The fixed left sidebar currently eats a third of a phone screen. Below `md:` make it an overlay drawer: hidden by default, opened by a hamburger/filter button (top-left, ≥44px touch target), full-height, dismissible by tapping the map or an ✕. The houses-in-view counter stays visible in a compact top bar. Desktop (`md:`+) keeps the current docked panel.
+- [ ] **Step 2: Pin tray on phones.** Bottom-fixed, horizontally scrollable, `min-h-11` (44px) touch targets, safe-area inset padding (`pb-[env(safe-area-inset-bottom)]`), and it must not overlap the undo toast (toast stacks above the tray) or Mapbox attribution.
+- [ ] **Step 3: Property modal on phones.** Full-screen bottom sheet under `md:` (already specced in 4.2 — verify), body scrolls, close button reachable with a thumb, inputs ≥16px font (prevents iOS zoom-on-focus).
+- [ ] **Step 4: Selection panel + saved routes on phones.** Verify the route-save form and route list are reachable and usable in the drawer layout from Step 1; rep `<select>` and buttons ≥44px.
+- [ ] **Step 5: Admin pages on tablets/phones.** Nav cards 2×2 grid collapses to 1-col under `sm:`; CRUD tables stack or scroll horizontally without breaking layout; forms wrap.
+- [ ] **Step 6: Verify with chrome-devtools `emulate` viewports:** `390x844x3,mobile,touch` (iPhone-class) and `820x1180x2,mobile,touch` (iPad-class) on: `/map` (drawer open/close, tray tap targets, modal sheet, pin drop flow), `/admin`, `/admin/reps`, `/admin/pins`, `/admin/metrics`. take_screenshot evidence at each breakpoint. Reset emulation afterward.
+- [ ] **Step 7:** `npm run test && npx tsc --noEmit && npm run lint` — clean.
 
 ### Phase 6 checkpoint
 
