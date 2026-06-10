@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, BarChart3 } from "lucide-react";
 
@@ -31,6 +31,7 @@ export default function MetricsPage() {
   const [stats, setStats] = useState<RepStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchIdRef = useRef(0);
 
   useEffect(() => {
     load(days);
@@ -39,9 +40,11 @@ export default function MetricsPage() {
   async function load(d: number) {
     setLoading(true);
     setError(null);
+    const id = ++fetchIdRef.current;
     try {
       const res = await fetch(`/api/metrics?days=${d}`);
       const j = await res.json();
+      if (fetchIdRef.current !== id) return;
       if (!res.ok) {
         setError(j.error ?? "Failed to load metrics");
         setStats([]);
@@ -49,10 +52,11 @@ export default function MetricsPage() {
         setStats(j.stats ?? []);
       }
     } catch {
+      if (fetchIdRef.current !== id) return;
       setError("Network error — try again");
       setStats([]);
     } finally {
-      setLoading(false);
+      if (fetchIdRef.current === id) setLoading(false);
     }
   }
 

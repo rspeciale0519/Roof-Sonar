@@ -27,6 +27,9 @@ export default function MobileDrawer({ open, onClose, children }: Props) {
         onClick={onClose}
       />
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Filters"
         className={`fixed inset-y-0 left-0 z-50 flex w-[85vw] max-w-80 flex-col transition-transform duration-300 md:hidden ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="rr-panel flex h-full flex-col overflow-hidden rounded-l-none rounded-r-2xl">

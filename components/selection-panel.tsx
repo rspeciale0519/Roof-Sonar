@@ -71,7 +71,7 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
   }
 
   return (
-    <div className="rr-panel absolute bottom-24 left-2 right-2 z-20 flex max-h-[50vh] flex-col overflow-hidden md:bottom-4 md:left-auto md:right-4 md:max-h-[70vh] md:w-96">
+    <div className="rr-panel absolute bottom-36 left-2 right-2 z-20 flex max-h-[50vh] flex-col overflow-hidden md:bottom-4 md:left-auto md:right-4 md:max-h-[70vh] md:w-96">
       <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
         <h2 className="text-sm font-bold">
           Route <span className="ml-1 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-accent">{selection.length} stops</span>

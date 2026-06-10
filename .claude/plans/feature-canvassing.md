@@ -1132,6 +1132,6 @@ Reps use phones (some tablets). Every rep-facing surface must work one-handed on
 ## Self-review notes
 
 - **Spec coverage:** reps CRUD (2.1/2.3) · route→rep with history (3.1/3.2) · pins on routed/visited houses (4.3) · modal with rep, details, notes (4.1/4.2) · admin add/modify/delete pins AND tags (2.2/2.3) · rep tagging-per-visit + notes (5.x, rep app itself deferred by agreement) · doors-knocked tracking (1.2 rep_knock_stats, 6.1) · bottom tray, arm-then-tap, sticky, tap-pin-for-modal (5.2/4.3) · DNK property flag + route hard-filter (1.2, 3.1) · visit history not status (visits table) · pin expiry (expires_after_days + lateral join) · undo (5.1/5.2) · wrong-house snap (1.4, 5.2).
-- **Deferred consciously:** suggested-tags-by-usage ordering, per-rep daily goals, pin-type icon rendering on the map (color only for now), assignment notifications, route-status recompute self-heal (completion race + undo gap are best-effort; status is dashboard-only).
+- **Deferred consciously:** suggested-tags-by-usage ordering, per-rep daily goals, pin-type icon rendering on the map (color only for now), assignment notifications, route-status recompute self-heal (completion race + undo gap are best-effort; status is dashboard-only), per-row saving state on admin CRUD pages (global flag is acceptable for a small admin team).
 - **Type consistency check:** `record_visit`/`undo_visit` signatures match API callers; `MapProperty` pin fields match RPC v2 columns; `PinTrayProps` matches map-app state names.
 ```
