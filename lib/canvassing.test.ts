@@ -17,4 +17,9 @@ describe("nearestProperty", () => {
   it("returns null for an empty list", () => {
     expect(nearestProperty([], -81.344, 29.0711, 30)).toBeNull();
   });
+  it("prefers the first property when two are equidistant (stable tie-break)", () => {
+    const d = 0.00009; // ~10 m at 29° N
+    const props = [prop(1, -81.344, 29.0711 + d), prop(2, -81.344, 29.0711 - d)];
+    expect(nearestProperty(props, -81.344, 29.0711, 30)?.id).toBe(1);
+  });
 });
