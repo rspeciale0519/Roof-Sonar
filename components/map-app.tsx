@@ -88,6 +88,7 @@ export default function MapApp() {
         onBoxSelect={boxSelect}
         onViewport={(ps) => setVisibleCount(ps.length)}
         flyTo={flyTo}
+        onOpenProperty={setModalPropertyId}
       />
       <FilterSidebar
         filters={filters}

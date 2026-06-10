@@ -23,6 +23,7 @@ interface Props {
   onBoxSelect: (ps: MapProperty[]) => void;
   onViewport: (ps: MapProperty[], zoom: number) => void;
   flyTo?: { lng: number; lat: number } | null;
+  onOpenProperty: (id: number) => void;
 }
 
 function toGeojson(ps: MapProperty[], selected: Set<number>): GeoJSON.FeatureCollection {
@@ -40,6 +41,9 @@ function toGeojson(ps: MapProperty[], selected: Set<number>): GeoJSON.FeatureCol
         bucket: ageBucket(p.roof_year),
         selected: selected.has(p.id),
         payload: JSON.stringify(p),
+        pin_color: p.pin_color,
+        has_pin: p.pin_type_id != null,
+        dnk: p.do_not_knock,
       },
     })),
   };
@@ -55,7 +59,7 @@ const BUCKET_COLOR: mapboxgl.ExpressionSpecification = [
   "#9ca3af", // unknown
 ];
 
-export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSelect, onViewport, flyTo }: Props) {
+export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSelect, onViewport, flyTo, onOpenProperty }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const propertiesRef = useRef<MapProperty[]>([]);
@@ -65,6 +69,7 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
   const onViewportRef = useRef(onViewport);
   const onToggleRef = useRef(onToggleSelect);
   const onBoxRef = useRef(onBoxSelect);
+  const onOpenPropertyRef = useRef(onOpenProperty);
   const [zoom, setZoom] = useState(10);
   const [loading, setLoading] = useState(false);
   const [box, setBox] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
@@ -74,6 +79,7 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
   onViewportRef.current = onViewport;
   onToggleRef.current = onToggleSelect;
   onBoxRef.current = onBoxSelect;
+  onOpenPropertyRef.current = onOpenProperty;
 
   // ----- init map once -----
   useEffect(() => {
@@ -121,6 +127,30 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
         },
       });
 
+      map.addLayer({
+        id: "visit-pins",
+        type: "circle",
+        source: "properties",
+        filter: ["==", ["get", "has_pin"], true],
+        paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], FETCH_ZOOM, 5, 19, 9],
+          "circle-color": ["coalesce", ["get", "pin_color"], "#f97316"],
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#ffffff",
+          "circle-translate": [0, -34],
+          "circle-pitch-alignment": "map",
+        },
+      });
+
+      map.addLayer({
+        id: "dnk-marks",
+        type: "symbol",
+        source: "properties",
+        filter: ["==", ["get", "dnk"], true],
+        layout: { "text-field": "✕", "text-size": 12, "text-offset": [0, -2.6], "text-allow-overlap": true },
+        paint: { "text-color": "#ffffff" },
+      });
+
       // Three-line label centered on the roof (PRD: Map Display Spec)
       map.addLayer({
         id: "property-labels",
@@ -151,6 +181,11 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
       });
 
       const clickHandler = (e: mapboxgl.MapMouseEvent) => {
+        const pinHit = map.queryRenderedFeatures(e.point, { layers: ["visit-pins"] })[0];
+        if (pinHit?.properties?.payload) {
+          onOpenPropertyRef.current((JSON.parse(pinHit.properties.payload as string) as MapProperty).id);
+          return;
+        }
         const features = map.queryRenderedFeatures(e.point, {
           layers: ["property-labels", "property-dots"],
         });
@@ -159,7 +194,7 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
         onToggleRef.current(JSON.parse(f.properties.payload as string) as MapProperty);
       };
       map.on("click", clickHandler);
-      for (const layer of ["property-labels", "property-dots"]) {
+      for (const layer of ["visit-pins", "property-labels", "property-dots"]) {
         map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));
         map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
       }
