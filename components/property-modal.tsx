@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Plus } from "lucide-react";
 import type { Tag, Visit, PropertyNote, RouteStatus } from "@/lib/types";
 import { roofAgeLabel, OCCUPANCIES } from "@/lib/types";
@@ -49,10 +49,7 @@ const STATUS_CHIP: Record<RouteStatus, { label: string; color: string }> = {
 };
 
 const occLabel = (k: string) => OCCUPANCIES.find((o) => o.key === k)?.label ?? k;
-
-function fmt(date: string) {
-  return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+const fmt = (date: string) => new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
 function Detail({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -73,7 +70,6 @@ export default function PropertyModal({ propertyId, onClose }: Props) {
   const [noteError, setNoteError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -331,7 +327,6 @@ export default function PropertyModal({ propertyId, onClose }: Props) {
               )}
               {noteError && <p className="mb-1 text-[11px] text-hot">{noteError}</p>}
               <textarea
-                ref={textareaRef}
                 className="rr-input min-h-[72px] resize-y text-base md:text-[14px]"
                 placeholder="Add a note…"
                 value={noteBody}
