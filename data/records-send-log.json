@@ -1,0 +1,268 @@
+[
+  {
+    "slug": "seminole-county",
+    "to": "BPPublicRecords@seminolecountyfl.gov",
+    "cc": [
+      "publicrecords@seminolecountyfl.gov"
+    ],
+    "message_id": "<d955b6ec-c943-2d1e-90fa-bdbeb0070e43@roofsonar.com>",
+    "sent_at": "2026-06-10T15:08:59.847Z"
+  },
+  {
+    "slug": "sanford",
+    "to": "Building@sanfordfl.gov",
+    "cc": [
+      "lisa.antonini@sanfordfl.gov"
+    ],
+    "message_id": "<6b791db9-9f9f-0841-d6fb-b4f87885414c@roofsonar.com>",
+    "sent_at": "2026-06-10T15:10:26.607Z"
+  },
+  {
+    "slug": "oviedo",
+    "to": "buildingpermits@cityofoviedo.net",
+    "cc": [
+      "erivera@cityofoviedo.net"
+    ],
+    "message_id": "<cb8a581a-2619-88bf-bb36-6d142173735a@roofsonar.com>",
+    "sent_at": "2026-06-10T15:11:49.269Z"
+  },
+  {
+    "slug": "lake-mary",
+    "to": "abranton@lakemaryfl.com",
+    "cc": [
+      "permitinfo@lakemaryfl.com"
+    ],
+    "message_id": "<1f1998b9-60de-f63d-edb4-b3702ea1f383@roofsonar.com>",
+    "sent_at": "2026-06-10T15:13:12.425Z"
+  },
+  {
+    "slug": "altamonte-springs",
+    "to": "cityclerk@altamonte.org",
+    "cc": [
+      "BFSD@altamonte.org"
+    ],
+    "message_id": "<3901c3e4-8f67-c2fa-ef76-66e46d00d465@roofsonar.com>",
+    "sent_at": "2026-06-10T15:14:42.955Z"
+  },
+  {
+    "slug": "casselberry",
+    "to": "dgardner@casselberry.org",
+    "cc": [
+      "Building@casselberry.org"
+    ],
+    "message_id": "<5420a09c-4759-32d7-ce77-d40c8af7a087@roofsonar.com>",
+    "sent_at": "2026-06-10T15:15:53.9Z"
+  },
+  {
+    "slug": "longwood",
+    "to": "clerk@longwoodfl.org",
+    "cc": [
+      "building@longwoodfl.org"
+    ],
+    "message_id": "<0359b0b1-dfdb-813f-eff3-0a6d4696dd80@roofsonar.com>",
+    "sent_at": "2026-06-10T15:16:43.816Z"
+  },
+  {
+    "slug": "winter-springs",
+    "to": "cityclerkdepartment@winterspringsfl.org",
+    "cc": [
+      "customerservice@winterspringsfl.org"
+    ],
+    "message_id": "<0189fe01-5720-6ba8-462e-b80012919d7a@roofsonar.com>",
+    "sent_at": "2026-06-10T15:17:58.539Z"
+  },
+  {
+    "slug": "volusia-county",
+    "to": "PermitCtr@volusia.org",
+    "cc": [
+      "nventura@volusia.org"
+    ],
+    "message_id": "<9fe98f37-a079-a135-6ccb-6012f27ee981@roofsonar.com>",
+    "sent_at": "2026-06-10T15:19:22.32Z"
+  },
+  {
+    "slug": "daytona-beach",
+    "to": "clerk@codb.us",
+    "cc": [],
+    "message_id": "<6ce9a406-69e0-64de-6f4c-5f99c96b6bf5@roofsonar.com>",
+    "sent_at": "2026-06-10T15:20:52.049Z"
+  },
+  {
+    "slug": "ormond-beach",
+    "to": "cityclerk@ormondbeach.org",
+    "cc": [
+      "bponline@ormondbeach.org"
+    ],
+    "message_id": "<889867ba-ad19-ec1d-413c-dd4b7c39ba0a@roofsonar.com>",
+    "sent_at": "2026-06-10T15:22:18.278Z"
+  },
+  {
+    "slug": "deland",
+    "to": "building@deland.org",
+    "cc": [
+      "gowanc@deland.org"
+    ],
+    "message_id": "<50ba7992-0e9a-23af-586e-ccaf2c14ffd5@roofsonar.com>",
+    "sent_at": "2026-06-10T15:23:39.406Z"
+  },
+  {
+    "slug": "new-smyrna-beach",
+    "to": "clerk@cityofnsb.com",
+    "cc": [
+      "swoodworth@cityofnsb.com"
+    ],
+    "message_id": "<14361492-36f5-290f-a452-8ebeaa9e6475@roofsonar.com>",
+    "sent_at": "2026-06-10T15:24:36.599Z"
+  },
+  {
+    "slug": "edgewater",
+    "to": "CityClerk@cityofedgewater.org",
+    "cc": [
+      "BuildingDept@cityofedgewater.org"
+    ],
+    "message_id": "<03552d19-3bb7-2263-0f45-c824da673c0c@roofsonar.com>",
+    "sent_at": "2026-06-10T15:25:46.837Z"
+  },
+  {
+    "slug": "debary",
+    "to": "EFrankton@DeBary.org",
+    "cc": [
+      "buildingofficial@debary.org"
+    ],
+    "message_id": "<625466b4-453f-b83d-0727-ce0b4fac8d25@roofsonar.com>",
+    "sent_at": "2026-06-10T15:27:14.424Z"
+  },
+  {
+    "slug": "orange-city",
+    "to": "kburleson@orangecityfl.gov",
+    "cc": [],
+    "message_id": "<4d2dce17-76c9-500c-c9e3-af12778690f1@roofsonar.com>",
+    "sent_at": "2026-06-10T15:28:39.712Z"
+  },
+  {
+    "slug": "holly-hill",
+    "to": "vmanning@hollyhillfl.org",
+    "cc": [
+      "Permitdesk@hollyhillfl.org"
+    ],
+    "message_id": "<5ea273b6-2f68-3b1a-bb0f-c70ce41eedbf@roofsonar.com>",
+    "sent_at": "2026-06-10T15:30:02.616Z"
+  },
+  {
+    "slug": "daytona-beach-shores",
+    "to": "permits@cityofdbs.org",
+    "cc": [],
+    "message_id": "<a36fb801-80f3-cd93-9086-42ab7b9c820a@roofsonar.com>",
+    "sent_at": "2026-06-10T15:31:02.558Z"
+  },
+  {
+    "slug": "ponce-inlet",
+    "to": "apierce@ponce-inlet.org",
+    "cc": [
+      "hbaker@ponce-inlet.org"
+    ],
+    "message_id": "<de18b031-9c24-5bef-8bce-52fa45bf5f84@roofsonar.com>",
+    "sent_at": "2026-06-10T15:31:49.794Z"
+  },
+  {
+    "slug": "lake-helen",
+    "to": "permits@lakehelen.org",
+    "cc": [
+      "admin@lakehelen.org"
+    ],
+    "message_id": "<48f34aed-e355-222a-71cf-71b29443ff13@roofsonar.com>",
+    "sent_at": "2026-06-10T15:32:58.271Z"
+  },
+  {
+    "slug": "pierson",
+    "to": "info@townofpierson.org",
+    "cc": [],
+    "message_id": "<bc148228-f1b4-1cf9-7820-fe15013ea672@roofsonar.com>",
+    "sent_at": "2026-06-10T15:34:07.003Z"
+  },
+  {
+    "slug": "orange-county",
+    "to": "PublicRecordRequest@ocfl.net",
+    "cc": [
+      "FastTrackPermittingHelpDesk@ocfl.net"
+    ],
+    "message_id": "<f5995dbb-3755-f4d6-b142-ce64faae326c@roofsonar.com>",
+    "sent_at": "2026-06-10T15:35:20.427Z"
+  },
+  {
+    "slug": "winter-park",
+    "to": "permits@cityofwinterpark.org",
+    "cc": [
+      "cityclerk@cityofwinterpark.org"
+    ],
+    "message_id": "<3dd4d671-65c4-d6a5-665a-dc486c3f92f8@roofsonar.com>",
+    "sent_at": "2026-06-10T15:36:42.69Z"
+  },
+  {
+    "slug": "apopka",
+    "to": "cityclerk@apopka.net",
+    "cc": [],
+    "message_id": "<29e0ef87-460c-7f28-7928-392c15670209@roofsonar.com>",
+    "sent_at": "2026-06-10T15:37:32.431Z"
+  },
+  {
+    "slug": "ocoee",
+    "to": "msibbitt@ocoee.org",
+    "cc": [
+      "bldgdept@ocoee.org"
+    ],
+    "message_id": "<0f475142-c968-1438-505d-40292f56f8b7@roofsonar.com>",
+    "sent_at": "2026-06-10T15:38:36.824Z"
+  },
+  {
+    "slug": "winter-garden",
+    "to": "rmartin@cwgdn.com",
+    "cc": [
+      "permits@cwgdn.com"
+    ],
+    "message_id": "<73425396-f0e3-8b79-cfa8-12cae88c2442@roofsonar.com>",
+    "sent_at": "2026-06-10T15:40:04.634Z"
+  },
+  {
+    "slug": "belle-isle",
+    "to": "yquiceno@belleislefl.gov",
+    "cc": [
+      "COBIpermits@TeamUES.com"
+    ],
+    "message_id": "<410567ad-c3ae-5753-42d5-7d1dbe3c17c8@roofsonar.com>",
+    "sent_at": "2026-06-10T15:41:03.994Z"
+  },
+  {
+    "slug": "edgewood",
+    "to": "sriffle@edgewood-fl.gov",
+    "cc": [
+      "info@edgewood-fl.gov",
+      "PublicRecordRequest@ocfl.net"
+    ],
+    "message_id": "<c5a54db8-254f-e733-d390-e0c4b62ff447@roofsonar.com>",
+    "sent_at": "2026-06-10T15:41:49.724Z"
+  },
+  {
+    "slug": "eatonville",
+    "to": "vking@townofeatonville.org",
+    "cc": [],
+    "message_id": "<71281326-25e4-d69b-f02f-d72ec8605769@roofsonar.com>",
+    "sent_at": "2026-06-10T15:42:37.03Z"
+  },
+  {
+    "slug": "oakland",
+    "to": "kheard@oaklandfl.gov",
+    "cc": [
+      "oaklandfl@willdan.com"
+    ],
+    "message_id": "<6aeaaa07-2985-a8de-0639-fe5f480a3cf8@roofsonar.com>",
+    "sent_at": "2026-06-10T15:43:43.115Z"
+  },
+  {
+    "slug": "scpa-seminole",
+    "to": "data@scpafl.org",
+    "cc": [],
+    "message_id": "<scpa-contact-form-notification-37934>",
+    "sent_at": "2026-06-10T18:03:46.439Z"
+  }
+]

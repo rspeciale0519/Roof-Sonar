@@ -1,0 +1,14 @@
+{
+  "_comment": "Winter Springs, FL — combined New World (2000-2024) + Energov (2023-2026) roof permit extract. CSV produced by scripts/records/extract-winter-springs.py. New World reports are roof-only (every page shows 'Type: ROOF'), so the extractor prefixes every row 'ROOF' / 'ROOF: <text>'. The Energov 'Roof Permits' export also contains Solar / Sign / Shed / Screen Enclosure / Right of Way sections, so the extractor prefixes each row with its authoritative Workclass ('Roof: <text>', 'Solar: <text>', ...). The anchored roof_filter therefore keeps exactly the roof rows — free-text token matching would drop roof permits whose text lacks 'roof' and keep solar permits saying 'ROOF MOUNTED PV'.",
+  "columns": {
+    "permit_number": "PERMIT_NUMBER",
+    "parcel_number": "PARCEL_NUMBER",
+    "situs_address": "ADDRESS",
+    "issue_date": "ISSUE_DATE",
+    "status": "STATUS",
+    "work_description": "DESCRIPTION"
+  },
+  "roof_filter": "^ROOF\\b",
+  "excluded_status": "withdrawn|void|cancel|denied|revoked",
+  "date_format": "us"
+}

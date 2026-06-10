@@ -55,3 +55,6 @@ data/processed/*
 
 .env.local
 .env
+
+# python tooling cache (records extractors)
+__pycache__/

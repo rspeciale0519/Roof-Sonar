@@ -86,6 +86,11 @@ async function main() {
     if (i % 50000 === 0) console.log(`  ${i + Math.min(BATCH, points.length - i)} staged…`);
   }
 
+  if (process.argv.includes("--skip-join")) {
+    console.log(`Staged only (--skip-join). Run the join via Supabase CLI (PostgREST times out on large counties):`);
+    console.log(`  npx supabase db query "SET statement_timeout = '30min'; SELECT * FROM geocode_join_address_points('${county}')" --linked`);
+    return;
+  }
   console.log("Running geocode join…");
   const { data, error } = await client.rpc("geocode_join_address_points", { p_county: county });
   if (error) throw new Error(error.message);

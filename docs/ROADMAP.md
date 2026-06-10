@@ -26,7 +26,10 @@
 - [ ] Pin-type icons on map markers; suggested tags by usage; per-rep daily knock goals
 - [x] Records requests SENT to 30 jurisdictions (2026-06-10; log: data/records-send-log.json). Pending: 3 flagged (South Daytona, Oak Hill, Maitland — verify email by phone, then `npm run records -- --send --include-flagged`), 4 portal-only (Deltona, Port Orange, Bay Lake, LBV) + Windermere by hand
 - [ ] As extracts arrive: data/inbox/<slug>/ → ingest config → `npm run ingest:file`; track fee quotes/replies in rob@roofsonar.com
-- [ ] Load county address points + run geocode join (Orlando: 54k of 60k properties lack coordinates — only ~9% of Socrata history is pre-geocoded)
+- [x] Orange address points loaded (688,698 after CSV repair) + geocode join: Orlando 9%→96.8% geocoded (58,284/60,216), 56,298 with DOR use codes for the property-type filter (2026-06-10)
+- [ ] Seminole/Volusia address points: Seminole via SCPA daily Parcels.csv (has lat/lng per parcel); Volusia needs geocoding source (CAMA DB has no coords)
+- [ ] County-PA permit shortcuts discovered 2026-06-10: Volusia VCPA weekly CAMA Access DB has ALL-city permits (985k, ~107k roof; file in data/inbox/volusia-cama/) — build ingest; Orange has no PA shortcut (FastTrack captcha-gated, no GIS layer)
+- [x] SCPA custom data request SENT 2026-06-10 via scpafl.org contact form → data@scpafl.org (notification 37934; 10 business days, possible fees): county-wide CAMA permit table, all 8 Seminole jurisdictions. Tracked as slug scpa-seminole in send log + recipients.json
 - [ ] NAL owner-roll load (occupancy + building sqft → roofing squares)
 - [x] Vercel deploy — live at roof-sonar.vercel.app, project robs-projects-c72886ba/roof-sonar (2026-06-10)
 - [x] Point roofsonar.com at the Vercel project — live, www-primary; fixed proxied records + stale apex A in Cloudflare (2026-06-10)

@@ -3,6 +3,7 @@
   "_notes": "Portal-only jurisdictions (Deltona, Port Orange, Bay Lake, Lake Buena Vista) and Windermere (no published email) are intentionally absent — they are handled manually. verify_first entries are excluded from sends unless --include-flagged.",
   "recipients": [
     { "slug": "seminole-county", "name": "Seminole County (unincorporated)", "county": "Seminole", "to": "BPPublicRecords@seminolecountyfl.gov", "cc": ["publicrecords@seminolecountyfl.gov"], "system": "Seminole County Building Division permitting system", "scope_note": "unincorporated Seminole County" },
+    { "slug": "scpa-seminole", "name": "Seminole County Property Appraiser (SCPA)", "county": "Seminole", "to": "data@scpafl.org", "cc": [], "system": "SCPA CAMA permit table (aggregates ALL Seminole jurisdictions)", "scope_note": "county-wide incl. all cities; sent 2026-06-10 via scpafl.org contact form (notification 37934) — already in send log; would supersede the 8 per-jurisdiction Seminole requests" },
     { "slug": "sanford", "name": "City of Sanford", "county": "Seminole", "to": "Building@sanfordfl.gov", "cc": ["lisa.antonini@sanfordfl.gov"], "system": "Citizenserve" },
     { "slug": "oviedo", "name": "City of Oviedo", "county": "Seminole", "to": "buildingpermits@cityofoviedo.net", "cc": ["erivera@cityofoviedo.net"], "system": "City of Oviedo permitting system" },
     { "slug": "lake-mary", "name": "City of Lake Mary", "county": "Seminole", "to": "abranton@lakemaryfl.com", "cc": ["permitinfo@lakemaryfl.com"], "system": "Click2Gov" },

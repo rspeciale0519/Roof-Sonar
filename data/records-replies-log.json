@@ -1,0 +1,178 @@
+[
+  {
+    "uid": 4,
+    "slug": "lake-mary",
+    "from": "abranton@lakemaryfl.com",
+    "subject": "Automatic reply: Public Records Request — Roofing Permit Data",
+    "classification": "ack",
+    "attachments": [],
+    "date": "2026-06-10T15:13:18.000Z"
+  },
+  {
+    "uid": 5,
+    "slug": "volusia-county",
+    "from": "mailer-daemon@server.thespeciales.com",
+    "subject": "Mail delivery failed: returning message to sender",
+    "classification": "bounce",
+    "attachments": [],
+    "date": "2026-06-10T15:19:23.000Z"
+  },
+  {
+    "uid": 6,
+    "slug": "winter-springs",
+    "from": "ttarrant@winterspringsfl.org",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "ack",
+    "attachments": [],
+    "date": "2026-06-10T15:25:16.000Z"
+  },
+  {
+    "uid": 7,
+    "slug": "sanford",
+    "from": "lisa.antonini@sanfordfl.gov",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T15:27:57.000Z"
+  },
+  {
+    "uid": 8,
+    "slug": "ponce-inlet",
+    "from": "hbaker@ponce-inlet.org",
+    "subject": "Automatic reply: Public Records Request — Roofing Permit Data",
+    "classification": "ack",
+    "attachments": [],
+    "date": "2026-06-10T15:31:55.000Z"
+  },
+  {
+    "uid": 9,
+    "slug": "ponce-inlet",
+    "from": "apierce@ponce-inlet.org",
+    "subject": "Automatic reply: Public Records Request — Roofing Permit Data",
+    "classification": "ack",
+    "attachments": [],
+    "date": "2026-06-10T15:31:55.000Z"
+  },
+  {
+    "uid": 12,
+    "slug": "winter-park",
+    "from": "mailer-daemon@server.thespeciales.com",
+    "subject": "Mail delivery failed: returning message to sender",
+    "classification": "bounce",
+    "attachments": [],
+    "date": "2026-06-10T15:36:44.000Z"
+  },
+  {
+    "uid": 13,
+    "slug": "lake-mary",
+    "from": "ckillgore@lakemaryfl.com",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T15:36:40.000Z"
+  },
+  {
+    "uid": 14,
+    "slug": "winter-springs",
+    "from": "ttarrant@winterspringsfl.org",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "data",
+    "attachments": [
+      "data\\inbox\\winter-springs\\2026-06-10-New_World_Permit_Listing_-_Jan_1_2000_-_Dec_31_2004.pdf",
+      "data\\inbox\\winter-springs\\2026-06-10-New_World_Permit_Listing_-_Jan_1_2005_-_Jan_1_2015.pdf",
+      "data\\inbox\\winter-springs\\2026-06-10-New_World_Permit_Listing_-_Jan_2_2015_-_2024.pdf",
+      "data\\inbox\\winter-springs\\2026-06-10-Roof_Permits_-_Energov_2023_-_04_21_2026.pdf"
+    ],
+    "date": "2026-06-10T15:44:28.000Z"
+  },
+  {
+    "uid": 15,
+    "slug": "new-smyrna-beach",
+    "from": "kevans@cityofnsb.com",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T15:49:20.000Z"
+  },
+  {
+    "uid": 16,
+    "slug": "new-smyrna-beach",
+    "from": "newsmyrnabeachfl@request.justfoia.com",
+    "subject": "Records Request Confirmation",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T15:49:36.000Z"
+  },
+  {
+    "uid": 17,
+    "slug": "winter-garden",
+    "from": "rmartin@cwgdn.com",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T16:00:07.000Z"
+  },
+  {
+    "uid": 18,
+    "slug": "seminole-county",
+    "from": "publicrecords@seminolecountyfl.gov",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T16:04:03.000Z"
+  },
+  {
+    "uid": 19,
+    "slug": "debary",
+    "from": "buildingofficial@debary.org",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T16:09:25.000Z"
+  },
+  {
+    "uid": 21,
+    "slug": "volusia-county",
+    "from": "volusia@govqa.us",
+    "subject": "Welcome to the Volusia County Public Records Center!",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T16:56:56.000Z"
+  },
+  {
+    "uid": 22,
+    "slug": "unmatched-portal",
+    "from": "volusia@govqa.us",
+    "subject": "Growth and Resource Management :: G012660-061026",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T17:02:31.000Z"
+  },
+  {
+    "uid": 23,
+    "slug": "holly-hill",
+    "from": "vmanning@hollyhillfl.org",
+    "subject": "Re: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T17:12:59.000Z"
+  },
+  {
+    "uid": 24,
+    "slug": "holly-hill",
+    "from": "lmontgomery@hollyhillfl.org",
+    "subject": "Re: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T17:27:32.000Z"
+  },
+  {
+    "uid": 25,
+    "slug": "unmatched-portal",
+    "from": "delandfl@request.justfoia.com",
+    "subject": "Records Request Confirmation",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T17:47:29.000Z"
+  }
+]
