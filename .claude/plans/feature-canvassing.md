@@ -1118,6 +1118,7 @@ Reps use phones (some tablets). Every rep-facing surface must work one-handed on
 - [ ] **Step 5: Admin pages on tablets/phones.** Nav cards 2×2 grid collapses to 1-col under `sm:`; CRUD tables stack or scroll horizontally without breaking layout; forms wrap.
 - [ ] **Step 6: Verify with chrome-devtools `emulate` viewports:** `390x844x3,mobile,touch` (iPhone-class) and `820x1180x2,mobile,touch` (iPad-class) on: `/map` (drawer open/close, tray tap targets, modal sheet, pin drop flow), `/admin`, `/admin/reps`, `/admin/pins`, `/admin/metrics`. take_screenshot evidence at each breakpoint. Reset emulation afterward.
 - [ ] **Step 7:** `npm run test && npx tsc --noEmit && npm run lint` — clean.
+- [ ] **Step 8: Phase-2 review carry-overs (deferred to this pass):** per-row saving state instead of one global `saving` flag on admin CRUD pages; guard PATCH handlers against empty `{}` patch bodies (400 "no fields to update"); make `DELETE /api/reps/[id]` 404 on phantom ids (`.select().single()` after update); Enter-to-submit on the reps add form (tags already has it).
 
 ### Phase 6 checkpoint
 

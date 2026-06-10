@@ -12,7 +12,7 @@
 ## Canvassing Operations (plan: .claude/plans/feature-canvassing.md)
 
 - [x] Phase 1 — Schema, types, test harness (migrations 0003+0004, vitest, nearestProperty) (2026-06-09)
-- [ ] Phase 2 — Reps, pin types, tags: APIs + admin pages
+- [x] Phase 2 — Reps, pin types, tags: APIs + admin pages (2026-06-10)
 - [ ] Phase 3 — Route assignment + lifecycle (rep, status, DNK hard filter)
 - [ ] Phase 4 — Property modal + pin layer (read path)
 - [ ] Phase 5 — Pin drop flow (tray, snap, undo)
