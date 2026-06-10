@@ -38,6 +38,22 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   return NextResponse.json({ route, stops: detail });
 }
 
+export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  const body = (await req.json().catch(() => null)) as { rep_id?: number | null } | null;
+  if (!body || body.rep_id === undefined) return NextResponse.json({ error: "rep_id required" }, { status: 400 });
+  const sb = supabaseAdmin();
+  const { data, error } = await sb
+    .from("routes")
+    .update({ rep_id: body.rep_id, status: body.rep_id ? "assigned" : "draft" })
+    .eq("id", id)
+    .select("id, status, rep_id")
+    .single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (body.rep_id) await sb.from("route_assignments").insert({ route_id: Number(id), rep_id: body.rep_id });
+  return NextResponse.json({ route: data });
+}
+
 export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const { error } = await supabaseAdmin().from("routes").delete().eq("id", id);
