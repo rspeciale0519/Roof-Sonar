@@ -14,6 +14,8 @@
 
 **Out of scope (future plan):** the rep-facing app, Supabase Auth roles, offline queueing, geostamped knocks (schema columns exist, nothing populates them yet).
 
+**Security contract for the rep app (from automated security review, 2026-06-10):** today the app has ONE trust tier (shared APP_PASSWORD = admin), so `POST /api/visits` accepting `rep_id` from the body and unscoped `DELETE /api/visits/[id]` are by-design admin semantics. The moment per-rep logins exist these become vulnerabilities: (1) derive `rep_id` from the authenticated session, never the body; (2) gate undo_visit by ownership (rep may undo only their own recent visits) or admin role; (3) move route/property access behind RLS policies keyed to the session role. The rep-app plan MUST include these three items.
+
 ---
 
 ## File Structure

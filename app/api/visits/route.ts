@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
+// TRUST MODEL: single tier — the password middleware makes every caller an
+// admin, so rep_id is "record on behalf of rep X" data entry. When per-rep
+// logins land, rep_id MUST derive from the session, not the body (see the
+// rep-app security contract in .claude/plans/feature-canvassing.md).
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => null)) as {
     property_id?: number; pin_type_id?: number; rep_id?: number | null;
