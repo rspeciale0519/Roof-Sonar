@@ -45,19 +45,24 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
       property_ids: ordered.map((p) => p.id),
     };
     if (repId !== "") body.rep_id = repId;
-    const res = await fetch("/api/routes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    setSaving(false);
-    if (res.ok) {
-      setName("");
-      setRepId("");
-      onSaved();
-    } else {
-      const j = (await res.json()) as { error?: string };
-      setSaveError(j.error ?? `Save failed (${res.status})`);
+    try {
+      const res = await fetch("/api/routes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        setName("");
+        setRepId("");
+        onSaved();
+      } else {
+        const j = (await res.json()) as { error?: string };
+        setSaveError(j.error ?? `Save failed (${res.status})`);
+      }
+    } catch {
+      setSaveError("Network error — try again");
+    } finally {
+      setSaving(false);
     }
   }
 
