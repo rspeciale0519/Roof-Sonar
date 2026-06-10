@@ -11,7 +11,8 @@
     "ingest:orlando": "tsx scripts/ingest-orlando.ts",
     "ingest:volusia-api": "tsx scripts/ingest-volusia-api.ts",
     "ingest:nal": "tsx scripts/ingest-nal.ts",
-    "ingest:file": "tsx scripts/ingest-file.ts"
+    "ingest:file": "tsx scripts/ingest-file.ts",
+    "records": "tsx scripts/send-records-requests.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1",
@@ -21,6 +22,7 @@
     "lucide-react": "^0.561.0",
     "mapbox-gl": "^3.24.0",
     "next": "15.5.19",
+    "nodemailer": "^8.0.11",
     "react": "19.2.7",
     "react-dom": "19.2.7"
   },
@@ -29,6 +31,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
