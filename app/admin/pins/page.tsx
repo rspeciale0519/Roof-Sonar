@@ -71,6 +71,7 @@ function PinForm({
         <input
           className="rr-input flex-1"
           placeholder="Label *"
+          aria-label="Label"
           value={draft.label}
           onChange={e => onChange({ ...draft, label: e.target.value })}
         />
@@ -80,6 +81,7 @@ function PinForm({
           value={draft.color}
           onChange={e => onChange({ ...draft, color: e.target.value })}
           title="Pin color"
+          aria-label="Pin color"
         />
       </div>
       <div className="flex gap-2">
@@ -88,6 +90,7 @@ function PinForm({
           type="number"
           min="1"
           placeholder="Expires after days (blank = never)"
+          aria-label="Expires after days"
           value={draft.expires_after_days}
           onChange={e => onChange({ ...draft, expires_after_days: e.target.value })}
         />
@@ -96,6 +99,7 @@ function PinForm({
           type="number"
           min="0"
           placeholder="Order"
+          aria-label="Sort order"
           value={draft.sort_order}
           onChange={e => onChange({ ...draft, sort_order: e.target.value })}
         />
@@ -172,65 +176,86 @@ export default function PinsPage() {
     if (!editDraft.label.trim()) { setError("Label is required"); return; }
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/pin-types/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(draftToPayload(editDraft)),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Save failed"); return; }
-    setPins(prev => prev.map(p => p.id === id ? j.pin_type : p));
-    setEditingId(null);
-    setSuccess("Saved.");
+    try {
+      const res = await fetch(`/api/pin-types/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draftToPayload(editDraft)),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Save failed"); return; }
+      setPins(prev => prev.map(p => p.id === id ? j.pin_type : p));
+      setEditingId(null);
+      setSuccess("Saved.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function deletePin(id: number) {
+    if (!window.confirm("Delete? If it's in use it will be archived instead; otherwise this cannot be undone.")) return;
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/pin-types/${id}`, { method: "DELETE" });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Delete failed"); return; }
-    if (j.archived) {
-      setPins(prev => prev.map(p => p.id === id ? { ...p, archived: true } : p));
-      setSuccess("In use — archived instead.");
-    } else {
-      setPins(prev => prev.filter(p => p.id !== id));
-      setSuccess("Deleted.");
+    try {
+      const res = await fetch(`/api/pin-types/${id}`, { method: "DELETE" });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Delete failed"); return; }
+      if (j.archived) {
+        setPins(prev => prev.map(p => p.id === id ? { ...p, archived: true } : p));
+        setSuccess("In use — archived instead.");
+      } else {
+        setPins(prev => prev.filter(p => p.id !== id));
+        setSuccess("Deleted.");
+      }
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
     }
   }
 
   async function unarchive(id: number) {
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/pin-types/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ archived: false }),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Unarchive failed"); return; }
-    setPins(prev => prev.map(p => p.id === id ? j.pin_type : p));
-    setSuccess("Unarchived.");
+    try {
+      const res = await fetch(`/api/pin-types/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archived: false }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Unarchive failed"); return; }
+      setPins(prev => prev.map(p => p.id === id ? j.pin_type : p));
+      setSuccess("Unarchived.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function addPin() {
     if (!addDraft.label.trim()) { setError("Label is required"); return; }
     setSaving(true);
     setError(null);
-    const res = await fetch("/api/pin-types", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(draftToPayload(addDraft)),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Add failed"); return; }
-    setPins(prev => [...prev, j.pin_type]);
-    setAddDraft(defaultDraft());
-    setSuccess("Pin type added.");
+    try {
+      const res = await fetch("/api/pin-types", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draftToPayload(addDraft)),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Add failed"); return; }
+      setPins(prev => [...prev, j.pin_type]);
+      setAddDraft(defaultDraft());
+      setSuccess("Pin type added.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

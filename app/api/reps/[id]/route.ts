@@ -8,7 +8,11 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   }> | null;
   if (!body) return NextResponse.json({ error: "body required" }, { status: 400 });
   const patch: Record<string, unknown> = {};
-  if (body.name !== undefined) patch.name = body.name.trim();
+  if (body.name !== undefined) {
+    const name = body.name.trim();
+    if (!name) return NextResponse.json({ error: "name required" }, { status: 400 });
+    patch.name = name;
+  }
   if (body.phone !== undefined) patch.phone = body.phone || null;
   if (body.email !== undefined) patch.email = body.email || null;
   if (body.active !== undefined) patch.active = body.active;

@@ -55,62 +55,82 @@ export default function RepsPage() {
     if (!editDraft.name.trim()) { setError("Name is required"); return; }
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/reps/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: editDraft.name.trim(), phone: editDraft.phone || null, email: editDraft.email || null }),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Save failed"); return; }
-    setReps(prev => prev.map(r => r.id === id ? j.rep : r));
-    setEditingId(null);
-    setSuccess("Saved.");
+    try {
+      const res = await fetch(`/api/reps/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editDraft.name.trim(), phone: editDraft.phone || null, email: editDraft.email || null }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Save failed"); return; }
+      setReps(prev => prev.map(r => r.id === id ? j.rep : r));
+      setEditingId(null);
+      setSuccess("Saved.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function deactivate(id: number) {
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/reps/${id}`, { method: "DELETE" });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Deactivate failed"); return; }
-    setReps(prev => prev.map(r => r.id === id ? { ...r, active: false } : r));
-    setSuccess("Deactivated.");
+    try {
+      const res = await fetch(`/api/reps/${id}`, { method: "DELETE" });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Deactivate failed"); return; }
+      setReps(prev => prev.map(r => r.id === id ? { ...r, active: false } : r));
+      setSuccess("Deactivated.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function reactivate(id: number) {
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/reps/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ active: true }),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Reactivate failed"); return; }
-    setReps(prev => prev.map(r => r.id === id ? j.rep : r));
-    setSuccess("Reactivated.");
+    try {
+      const res = await fetch(`/api/reps/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: true }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Reactivate failed"); return; }
+      setReps(prev => prev.map(r => r.id === id ? j.rep : r));
+      setSuccess("Reactivated.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function addRep() {
     if (!addName.trim()) { setError("Name is required"); return; }
     setSaving(true);
     setError(null);
-    const res = await fetch("/api/reps", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: addName.trim(), phone: addPhone || null, email: addEmail || null }),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Add failed"); return; }
-    setReps(prev => [...prev, j.rep]);
-    setAddName("");
-    setAddPhone("");
-    setAddEmail("");
-    setSuccess("Rep added.");
+    try {
+      const res = await fetch("/api/reps", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: addName.trim(), phone: addPhone || null, email: addEmail || null }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Add failed"); return; }
+      setReps(prev => [...prev, j.rep]);
+      setAddName("");
+      setAddPhone("");
+      setAddEmail("");
+      setSuccess("Rep added.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -146,18 +166,21 @@ export default function RepsPage() {
                     <input
                       className="rr-input"
                       placeholder="Name"
+                      aria-label="Name"
                       value={editDraft.name}
                       onChange={e => setEditDraft(d => ({ ...d, name: e.target.value }))}
                     />
                     <input
                       className="rr-input"
                       placeholder="Phone"
+                      aria-label="Phone"
                       value={editDraft.phone}
                       onChange={e => setEditDraft(d => ({ ...d, phone: e.target.value }))}
                     />
                     <input
                       className="rr-input"
                       placeholder="Email"
+                      aria-label="Email"
                       value={editDraft.email}
                       onChange={e => setEditDraft(d => ({ ...d, email: e.target.value }))}
                     />
@@ -202,18 +225,21 @@ export default function RepsPage() {
               <input
                 className="rr-input"
                 placeholder="Name *"
+                aria-label="Name"
                 value={addName}
                 onChange={e => setAddName(e.target.value)}
               />
               <input
                 className="rr-input"
                 placeholder="Phone"
+                aria-label="Phone"
                 value={addPhone}
                 onChange={e => setAddPhone(e.target.value)}
               />
               <input
                 className="rr-input"
                 placeholder="Email"
+                aria-label="Email"
                 value={addEmail}
                 onChange={e => setAddEmail(e.target.value)}
               />

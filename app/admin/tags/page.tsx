@@ -47,65 +47,86 @@ export default function TagsPage() {
     if (!editLabel.trim()) { setError("Label is required"); return; }
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/tags/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label: editLabel.trim() }),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Save failed"); return; }
-    setTags(prev => prev.map(t => t.id === id ? j.tag : t));
-    setEditingId(null);
-    setSuccess("Saved.");
+    try {
+      const res = await fetch(`/api/tags/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label: editLabel.trim() }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Save failed"); return; }
+      setTags(prev => prev.map(t => t.id === id ? j.tag : t));
+      setEditingId(null);
+      setSuccess("Saved.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function deleteTag(id: number) {
+    if (!window.confirm("Delete? If it's in use it will be archived instead; otherwise this cannot be undone.")) return;
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/tags/${id}`, { method: "DELETE" });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Delete failed"); return; }
-    if (j.archived) {
-      setTags(prev => prev.map(t => t.id === id ? { ...t, archived: true } : t));
-      setSuccess("In use — archived instead.");
-    } else {
-      setTags(prev => prev.filter(t => t.id !== id));
-      setSuccess("Deleted.");
+    try {
+      const res = await fetch(`/api/tags/${id}`, { method: "DELETE" });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Delete failed"); return; }
+      if (j.archived) {
+        setTags(prev => prev.map(t => t.id === id ? { ...t, archived: true } : t));
+        setSuccess("In use — archived instead.");
+      } else {
+        setTags(prev => prev.filter(t => t.id !== id));
+        setSuccess("Deleted.");
+      }
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
     }
   }
 
   async function unarchive(id: number) {
     setSaving(true);
     setError(null);
-    const res = await fetch(`/api/tags/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ archived: false }),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Unarchive failed"); return; }
-    setTags(prev => prev.map(t => t.id === id ? j.tag : t));
-    setSuccess("Unarchived.");
+    try {
+      const res = await fetch(`/api/tags/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archived: false }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Unarchive failed"); return; }
+      setTags(prev => prev.map(t => t.id === id ? j.tag : t));
+      setSuccess("Unarchived.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function addTag() {
     if (!addLabel.trim()) { setError("Label is required"); return; }
     setSaving(true);
     setError(null);
-    const res = await fetch("/api/tags", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label: addLabel.trim() }),
-    });
-    const j = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(j.error ?? "Add failed"); return; }
-    setTags(prev => [...prev, j.tag]);
-    setAddLabel("");
-    setSuccess("Tag added.");
+    try {
+      const res = await fetch("/api/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label: addLabel.trim() }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setError(j.error ?? "Add failed"); return; }
+      setTags(prev => [...prev, j.tag]);
+      setAddLabel("");
+      setSuccess("Tag added.");
+    } catch {
+      setError("Network error — try again");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

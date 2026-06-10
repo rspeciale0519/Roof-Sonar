@@ -3,11 +3,15 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+  const body = (await req.json().catch(() => null)) as Partial<{ label: string; archived: boolean }> | null;
   if (!body) return NextResponse.json({ error: "body required" }, { status: 400 });
   const patch: Record<string, unknown> = {};
-  if (body["label"] !== undefined) patch["label"] = body["label"];
-  if (body["archived"] !== undefined) patch["archived"] = body["archived"];
+  if (body.label !== undefined) {
+    const label = body.label.trim();
+    if (!label) return NextResponse.json({ error: "label required" }, { status: 400 });
+    patch.label = label;
+  }
+  if (body.archived !== undefined) patch.archived = body.archived;
   const { data, error } = await supabaseAdmin().from("tags").update(patch).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ tag: data });

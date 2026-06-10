@@ -18,6 +18,9 @@ export async function POST(req: NextRequest) {
     .insert({ label: body.label.trim() })
     .select()
     .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    if (error.code === "23505") return NextResponse.json({ error: "Label already exists" }, { status: 409 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
   return NextResponse.json({ tag: data });
 }
