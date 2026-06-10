@@ -102,7 +102,15 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
     });
     mapRef.current = map;
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
-    map.addControl(new mapboxgl.GeolocateControl({ trackUserLocation: false }), "bottom-right");
+    map.addControl(
+      new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+        showUserHeading: true,
+        showAccuracyCircle: false,
+      }),
+      "bottom-right"
+    );
 
     map.on("load", () => {
       map.addSource("properties", { type: "geojson", data: toGeojson([], new Set()), promoteId: "id" });
