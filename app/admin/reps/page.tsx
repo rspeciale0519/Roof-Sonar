@@ -228,6 +228,7 @@ export default function RepsPage() {
                 aria-label="Name"
                 value={addName}
                 onChange={e => setAddName(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") void addRep(); }}
               />
               <input
                 className="rr-input"

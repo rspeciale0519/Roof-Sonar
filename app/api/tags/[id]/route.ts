@@ -12,6 +12,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     patch.label = label;
   }
   if (body.archived !== undefined) patch.archived = body.archived;
+  if (Object.keys(patch).length === 0) return NextResponse.json({ error: "no fields to update" }, { status: 400 });
   const { data, error } = await supabaseAdmin().from("tags").update(patch).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ tag: data });

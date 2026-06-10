@@ -15,6 +15,7 @@ interface Props {
   onOpenRoute: (id: number) => void;
   onDeleteRoute: (id: number) => void;
   onRefreshRoutes: () => void;
+  className?: string;
 }
 
 const STATUS_CHIP: Record<RouteStatus, { label: string; color: string }> = {
@@ -28,7 +29,7 @@ function toggle(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
-export default function FilterSidebar({ filters, onFilters, visibleCount, savedRoutes, onOpenRoute, onDeleteRoute, onRefreshRoutes }: Props) {
+export default function FilterSidebar({ filters, onFilters, visibleCount, savedRoutes, onOpenRoute, onDeleteRoute, onRefreshRoutes, className = "" }: Props) {
   const [jurisOpen, setJurisOpen] = useState(false);
   const [routesOpen, setRoutesOpen] = useState(false);
   const [reps, setReps] = useState<SalesRep[]>([]);
@@ -58,7 +59,7 @@ export default function FilterSidebar({ filters, onFilters, visibleCount, savedR
   }
 
   return (
-    <aside className="rr-panel absolute left-4 top-4 bottom-4 z-20 flex w-72 flex-col overflow-hidden">
+    <aside className={`rr-panel flex w-72 flex-col overflow-hidden ${className}`}>
       <div className="flex items-center gap-2.5 border-b border-line/60 px-4 py-3.5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 ring-1 ring-accent/40">
           <Radar className="h-4.5 w-4.5 text-accent" />
@@ -207,7 +208,7 @@ export default function FilterSidebar({ filters, onFilters, visibleCount, savedR
                           <span className="text-[11px] text-ink-dim">{r.rep_name ?? "Unassigned"}</span>
                         </div>
                         <select
-                          className="rr-input py-0.5 text-[11px]"
+                          className="rr-input py-2 text-[13px] min-h-11 md:min-h-0 md:py-1 md:text-[12px]"
                           value={r.rep_id ?? ""}
                           onChange={(e) => {
                             const val = e.target.value;

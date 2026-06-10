@@ -16,6 +16,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (body.phone !== undefined) patch.phone = body.phone || null;
   if (body.email !== undefined) patch.email = body.email || null;
   if (body.active !== undefined) patch.active = body.active;
+  if (Object.keys(patch).length === 0) return NextResponse.json({ error: "no fields to update" }, { status: 400 });
   const { data, error } = await supabaseAdmin().from("sales_reps").update(patch).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ rep: data });
@@ -23,7 +24,16 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
 export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const { error } = await supabaseAdmin().from("sales_reps").update({ active: false }).eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { data, error } = await supabaseAdmin()
+    .from("sales_reps")
+    .update({ active: false })
+    .eq("id", id)
+    .select("id")
+    .single();
+  if (error) {
+    if (error.code === "PGRST116") return NextResponse.json({ error: "rep not found" }, { status: 404 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  if (!data) return NextResponse.json({ error: "rep not found" }, { status: 404 });
   return NextResponse.json({ ok: true });
 }

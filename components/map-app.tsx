@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { SlidersHorizontal } from "lucide-react";
 import type { MapProperty, PinType, SalesRep, SavedRoute } from "@/lib/types";
 import type { MapFilters } from "./map-view";
 import FilterSidebar from "./filter-sidebar";
+import MobileDrawer from "./mobile-drawer";
 import SelectionPanel from "./selection-panel";
 import PropertyModal from "./property-modal";
 import PinTray from "./pin-tray";
@@ -34,6 +36,7 @@ export default function MapApp() {
   const [undo, setUndo] = useState<UndoState | null>(null);
   const [pinDropError, setPinDropError] = useState<string | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/pin-types")
@@ -169,6 +172,31 @@ export default function MapApp() {
         armedPinId={armedPinId}
         onPinDrop={handlePinDrop}
       />
+      {/* Mobile: floating toggle button (phones only) */}
+      <button
+        className="absolute left-4 top-4 z-30 flex min-h-11 min-w-11 items-center gap-2 rounded-xl border border-line/60 bg-panel/90 px-3 py-2.5 text-[13px] font-medium shadow-lg backdrop-blur-md md:hidden"
+        aria-label="Open filters"
+        onClick={() => setSidebarOpen(true)}
+      >
+        <SlidersHorizontal className="h-4 w-4 text-accent" />
+        <span>{visibleCount.toLocaleString()}</span>
+      </button>
+
+      {/* Mobile: drawer */}
+      <MobileDrawer open={sidebarOpen} onClose={() => setSidebarOpen(false)}>
+        <FilterSidebar
+          filters={filters}
+          onFilters={setFilters}
+          visibleCount={visibleCount}
+          savedRoutes={savedRoutes}
+          onOpenRoute={openRoute}
+          onDeleteRoute={deleteRoute}
+          onRefreshRoutes={refreshRoutes}
+          className="flex-1 overflow-hidden"
+        />
+      </MobileDrawer>
+
+      {/* Desktop: docked sidebar */}
       <FilterSidebar
         filters={filters}
         onFilters={setFilters}
@@ -177,6 +205,7 @@ export default function MapApp() {
         onOpenRoute={openRoute}
         onDeleteRoute={deleteRoute}
         onRefreshRoutes={refreshRoutes}
+        className="absolute left-4 top-4 bottom-4 z-20 hidden md:flex"
       />
       <SelectionPanel
         selection={[...selection.values()]}

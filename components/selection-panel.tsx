@@ -71,7 +71,7 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
   }
 
   return (
-    <div className="rr-panel absolute bottom-4 right-4 z-20 flex max-h-[70vh] w-96 flex-col overflow-hidden">
+    <div className="rr-panel absolute bottom-24 left-2 right-2 z-20 flex max-h-[50vh] flex-col overflow-hidden md:bottom-4 md:left-auto md:right-4 md:max-h-[70vh] md:w-96">
       <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
         <h2 className="text-sm font-bold">
           Route <span className="ml-1 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-accent">{selection.length} stops</span>
@@ -122,7 +122,7 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
       <div className="space-y-2.5 border-t border-line/60 px-4 py-3">
         <input className="rr-input" placeholder="Route name (e.g. Deltona NE — Tuesday)" value={name} onChange={(e) => setName(e.target.value)} />
         <select
-          className="rr-input"
+          className="rr-input min-h-11"
           value={repId}
           onChange={(e) => setRepId(e.target.value === "" ? "" : Number(e.target.value))}
         >
@@ -133,13 +133,13 @@ export default function SelectionPanel({ selection, startId, onStart, onRemove, 
         </select>
         {saveError && <p className="text-[12px] text-hot">{saveError}</p>}
         <div className="grid grid-cols-3 gap-2">
-          <button className="rr-btn rr-btn-primary" onClick={exportCsv}>
+          <button className="rr-btn rr-btn-primary min-h-11" onClick={exportCsv}>
             <Download className="h-3.5 w-3.5" /> CSV
           </button>
-          <button className="rr-btn rr-btn-ghost" onClick={() => setLinks(googleMapsLinks(ordered))}>
+          <button className="rr-btn rr-btn-ghost min-h-11" onClick={() => setLinks(googleMapsLinks(ordered))}>
             <MapIcon className="h-3.5 w-3.5" /> Maps
           </button>
-          <button className="rr-btn rr-btn-ghost" disabled={saving} onClick={saveRoute}>
+          <button className="rr-btn rr-btn-ghost min-h-11" disabled={saving} onClick={saveRoute}>
             <Save className="h-3.5 w-3.5" /> {saving ? "…" : "Save"}
           </button>
         </div>
