@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { X, Plus } from "lucide-react";
 import type { Tag, Visit, PropertyNote, RouteStatus } from "@/lib/types";
-import { roofAgeLabel, occLabel, useBucketLabel } from "@/lib/types";
+import { roofAgeLabel, occLabel, labelForUseCode } from "@/lib/types";
 
 interface PropertyDetail {
   id: number;
@@ -242,7 +242,7 @@ export default function PropertyModal({ propertyId, onClose, onDataChanged }: Pr
                 <Detail label="Owner" value={p.owner_name} />
                 {/* Fix 11: owner mailing address */}
                 <Detail label="Owner mailing" value={p.owner_mailing_address} />
-                <Detail label="Property type" value={useBucketLabel(p.dor_use_code)} />
+                <Detail label="Property type" value={labelForUseCode(p.dor_use_code)} />
                 <Detail label="Occupancy" value={occLabel(p.occupancy)} />
                 <Detail label="Homestead" value={p.homestead === true ? "Yes" : p.homestead === false ? "No" : null} />
                 <Detail label="Last permit #" value={p.last_permit_number} />

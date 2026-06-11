@@ -30,8 +30,9 @@ export const USE_BUCKETS: { key: UseBucket; label: string }[] = [
   { key: "other", label: "Other / Unknown" },
 ];
 
-/** FL DOR use code -> filter bucket; mirrors the CASE in properties_in_bbox. */
-export function useBucket(code: string | null): UseBucket {
+/** FL DOR use code -> filter bucket; mirrors the CASE in properties_in_bbox.
+ *  (named bucketForUseCode — a `use*` name reads as a React Hook to eslint) */
+export function bucketForUseCode(code: string | null): UseBucket {
   switch ((code ?? "").slice(0, 2)) {
     case "01": return "single";
     case "02": return "mobile";
@@ -42,8 +43,8 @@ export function useBucket(code: string | null): UseBucket {
   }
 }
 
-export const useBucketLabel = (code: string | null): string =>
-  USE_BUCKETS.find((b) => b.key === useBucket(code))?.label ?? "Other / Unknown";
+export const labelForUseCode = (code: string | null): string =>
+  USE_BUCKETS.find((b) => b.key === bucketForUseCode(code))?.label ?? "Other / Unknown";
 
 export type AgeBucket = "0-5" | "6-10" | "11-15" | "16+" | "unknown";
 

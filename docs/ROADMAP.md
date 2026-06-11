@@ -29,6 +29,10 @@
 - [ ] 5 acquisition emails/requests pending Rob's go: HCPA CAMA permit table (~$125), Pasco county Accela extract, Lake PA BPE permits file (eric.bjorn@lcpafl.org), Sumter NextRequest, Wildwood JustFOIA
 - [ ] Gap-fill (later): Hillsborough unincorporated + Temple Terrace + Plant City, Pasco's 4 cities, Leesburg/Fruitland Park/Lady Lake, Marion post-Nov-2025 (Tyler Civic Access)
 
+## Gated Communities (plan: .claude/plans/feature-gated-communities.md)
+
+- [x] Phase 1 — Schema + pipeline: migration 0008 (gated_areas + staging + DBSCAN/buffer/tier RPC), build-gated-areas.ts (Orange/Volusia county private-road layers, Seminole OSM fallback, Overpass gates). 435 suggested areas: Orange 108H/43M, Seminole 181H/20M, Volusia 58H/25M; Heathrow verifies high (2026-06-11)
+
 ## Backlog (not yet planned)
 
 - [ ] Rep-facing app (Supabase Auth roles, assigned-routes-only view, offline tolerance, geostamped knocks)
