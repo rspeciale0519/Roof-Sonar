@@ -1,0 +1,17 @@
+# Upload only what the Next build needs — county data drops, research
+# artifacts, and pipeline scratch stay local (multi-GB).
+node_modules
+.next
+.git
+.claude
+data
+docs
+archive
+scripts
+ingest
+supabase/.temp
+*.zip
+*.accdb
+*.csv
+*.pdf
+__pycache__
