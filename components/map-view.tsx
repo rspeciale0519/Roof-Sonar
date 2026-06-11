@@ -6,6 +6,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import type { MapProperty } from "@/lib/types";
 import { ageBucket, roofAgeLabel } from "@/lib/types";
 import { nearestProperty } from "@/lib/canvassing";
+import { addGatedLayers, refreshGatedAreas, setGatedVisibility } from "@/lib/gated-overlay";
 
 const LABEL_ZOOM = 16; // PRD: labels at zoom >= 16 only; dots/heat below
 const FETCH_ZOOM = 13; // below this the bbox is too big to be useful
@@ -16,6 +17,7 @@ export interface MapFilters {
   ages: string[];
   occupancies: string[];
   uses: string[];
+  showGated: boolean;
 }
 
 interface Props {
@@ -114,6 +116,11 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
     );
 
     map.on("load", () => {
+      // gated overlay first: its fill must render BENEATH the property layers
+      // and it registers no handlers (display only — never affects routing)
+      addGatedLayers(map);
+      setGatedVisibility(map, filtersRef.current.showGated);
+
       map.addSource("properties", { type: "geojson", data: toGeojson([], new Set()), promoteId: "id" });
 
       // Dots below label zoom (and selection ring at all zooms)
@@ -230,6 +237,7 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
     const refresh = async () => {
       const z = map.getZoom();
       setZoom(z);
+      void refreshGatedAreas(map); // own zoom floor — polygons show before dots
       if (z < FETCH_ZOOM) {
         propertiesRef.current = [];
         (map.getSource("properties") as mapboxgl.GeoJSONSource | undefined)?.setData(toGeojson([], new Set()));
@@ -273,6 +281,9 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
     map.on("moveend", debounced);
     map.on("zoomend", debounced);
     (map as unknown as { _rrRefresh?: () => void })._rrRefresh = () => void refresh();
+    if (process.env.NODE_ENV !== "production") {
+      (window as unknown as { __rrMap?: mapboxgl.Map }).__rrMap = map; // dev-only: browser-test navigation hook
+    }
 
     return () => {
       clearTimeout(t);
@@ -286,6 +297,12 @@ export default function MapView({ filters, selectedIds, onToggleSelect, onBoxSel
     const map = mapRef.current as (mapboxgl.Map & { _rrRefresh?: () => void }) | null;
     map?._rrRefresh?.();
   }, [filters]);
+
+  // ----- gated overlay visibility toggle -----
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && map.isStyleLoaded()) setGatedVisibility(map, filters.showGated);
+  }, [filters.showGated]);
 
   // ----- Phase 5 refresh hook (triggered by parent after modal edits) -----
   useEffect(() => {

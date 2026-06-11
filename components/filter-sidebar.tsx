@@ -145,6 +145,25 @@ export default function FilterSidebar({ filters, onFilters, visibleCount, savedR
         </section>
 
         <section>
+          <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-dim">Overlays</h2>
+          <label className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-[13px] hover:bg-panel-2">
+            <input
+              type="checkbox"
+              className="accent-[#7c3aed]"
+              checked={filters.showGated}
+              onChange={() => onFilters({ ...filters, showGated: !filters.showGated })}
+            />
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-sm" style={{ background: "#7c3aed", opacity: 0.55 }} />
+              Gated areas
+            </span>
+          </label>
+          <p className="mt-1 px-1 text-[11px] leading-snug text-ink-dim">
+            Purple shading = likely gated/private community (darker = higher confidence). Display only — routes are not affected.
+          </p>
+        </section>
+
+        <section>
           <button
             className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-ink-dim"
             onClick={() => setJurisOpen(!jurisOpen)}
