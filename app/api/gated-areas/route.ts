@@ -2,12 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
 /**
- * Gated-community polygons for the map overlay (display only — routes never
- * read these). Returns a GeoJSON FeatureCollection of non-cleared areas in
- * the bbox via the gated_areas_in_bbox RPC.
+ * Gated-community polygons (display only — routes never read these).
+ * Map mode (default): ?bbox=… -> GeoJSON FeatureCollection of non-cleared areas.
+ * Admin mode: ?list=1[&county=X][&status=Y] -> all rows incl. cleared, no geometry.
  */
 export async function GET(req: NextRequest) {
-  const bbox = (req.nextUrl.searchParams.get("bbox") ?? "").split(",").map(Number);
+  const q = req.nextUrl.searchParams;
+  if (q.get("list") === "1") {
+    let sel = supabaseAdmin()
+      .from("gated_areas")
+      .select("id, county, name, confidence, status, notes, source, created_at")
+      .order("county")
+      .order("confidence")
+      .order("id");
+    const county = q.get("county");
+    const status = q.get("status");
+    if (county) sel = sel.eq("county", county);
+    if (status) sel = sel.eq("status", status);
+    const { data, error } = await sel;
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ areas: data ?? [] });
+  }
+
+  const bbox = (q.get("bbox") ?? "").split(",").map(Number);
   if (bbox.length !== 4 || bbox.some(isNaN)) {
     return NextResponse.json({ error: "bbox=minLng,minLat,maxLng,maxLat required" }, { status: 400 });
   }
