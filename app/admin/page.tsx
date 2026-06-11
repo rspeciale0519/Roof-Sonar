@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart3, Calculator, Check, MapPin, Tag as TagIcon, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Calculator, Check, MapPin, ShieldCheck, Tag as TagIcon, Users } from "lucide-react";
 
 const ADMIN_LINKS = [
   { href: "/admin/reps", label: "Sales reps", icon: Users },
   { href: "/admin/pins", label: "Pin types", icon: MapPin },
   { href: "/admin/tags", label: "Tags", icon: TagIcon },
   { href: "/admin/metrics", label: "Knock metrics", icon: BarChart3 },
+  { href: "/admin/gated", label: "Gated areas", icon: ShieldCheck },
 ];
 
 const PRESETS = [1.1, 1.2, 1.3, 1.4, 1.5];

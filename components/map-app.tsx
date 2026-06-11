@@ -20,7 +20,7 @@ interface UndoState {
 }
 
 export default function MapApp() {
-  const [filters, setFilters] = useState<MapFilters>({ jurisdictions: [], ages: [], occupancies: [], uses: [] });
+  const [filters, setFilters] = useState<MapFilters>({ jurisdictions: [], ages: [], occupancies: [], uses: [], showGated: true });
   const [visibleCount, setVisibleCount] = useState(0);
   const [selection, setSelection] = useState<Map<number, MapProperty>>(new Map());
   const [startId, setStartId] = useState<number | null>(null);
