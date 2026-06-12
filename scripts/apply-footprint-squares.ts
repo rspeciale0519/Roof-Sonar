@@ -27,6 +27,8 @@ const MIN_SQFT = 200; // ignore sheds/pools
 const MAX_NEAR = 0.000135; // ~15 m, nearest-building fallback radius (degrees lat)
 const CELL = 0.003; // ~330 m grid cell
 const PAGE = 2000; // USA Structures maxRecordCount
+const POOL = 8; // concurrent tile downloads
+const TILE = 0.03; // ~3.3 km download tile — parallelism + keeps OID paging shallow
 
 interface BBox { minLng: number; minLat: number; maxLng: number; maxLat: number }
 interface Foot { sqft: number; ring: number[]; minLng: number; minLat: number; maxLng: number; maxLat: number; cx: number; cy: number }
@@ -48,22 +50,40 @@ async function fetchJson(url: string): Promise<Feature[]> {
   return [];
 }
 
-/** Stream every footprint intersecting bbox, OBJECTID-paged (stable, no deep-offset cap). */
-async function* footprintPages(b: BBox): AsyncGenerator<Feature[]> {
-  const env = `${b.minLng},${b.minLat},${b.maxLng},${b.maxLat}`;
+/** Split a bbox into ~TILE-degree tiles so downloads parallelize and OID paging stays shallow. */
+function tilesOf(b: BBox): BBox[] {
+  const out: BBox[] = [];
+  for (let lng = b.minLng; lng < b.maxLng; lng += TILE)
+    for (let lat = b.minLat; lat < b.maxLat; lat += TILE)
+      out.push({ minLng: lng, minLat: lat, maxLng: Math.min(lng + TILE, b.maxLng), maxLat: Math.min(lat + TILE, b.maxLat) });
+  return out;
+}
+
+/** All footprints intersecting one tile, OBJECTID-paged (stable, no deep-offset cap). */
+async function downloadTile(t: BBox): Promise<Feature[]> {
+  const env = `${t.minLng},${t.minLat},${t.maxLng},${t.maxLat}`;
+  const all: Feature[] = [];
   let lastOid = 0;
   for (;;) {
     const url = `${USA}/query?where=${encodeURIComponent(`OBJECTID>${lastOid}`)}` +
       `&geometry=${encodeURIComponent(env)}&geometryType=esriGeometryEnvelope&inSR=4326` +
       `&spatialRel=esriSpatialRelIntersects&outFields=${encodeURIComponent("OBJECTID,SQFEET")}` +
-      `&returnGeometry=true&outSR=4326&orderByFields=OBJECTID&resultRecordCount=${PAGE}&f=json`;
+      `&returnGeometry=true&geometryPrecision=6&outSR=4326&orderByFields=OBJECTID&resultRecordCount=${PAGE}&f=json`;
     const feats = await fetchJson(url);
     if (feats.length === 0) break;
-    yield feats;
+    all.push(...feats);
     lastOid = feats[feats.length - 1].attributes.OBJECTID;
     if (feats.length < PAGE) break;
-    await new Promise((r) => setTimeout(r, 60));
   }
+  return all;
+}
+
+/** Run fn over items with a fixed concurrency pool. */
+async function pool<T>(items: T[], n: number, fn: (t: T, i: number) => Promise<void>): Promise<void> {
+  let idx = 0;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+    while (idx < items.length) { const i = idx++; await fn(items[i], i); }
+  }));
 }
 
 class Grid {
@@ -145,11 +165,22 @@ function match(grid: Grid, lng: number, lat: number): { sqft: number; near: bool
 
 async function buildGrid(b: BBox, label: string): Promise<Grid> {
   const grid = new Grid();
-  let pages = 0;
-  for await (const feats of footprintPages(b)) {
-    for (const f of feats) { const ft = toFoot(f); if (ft) grid.add(ft); }
-    if (++pages % 25 === 0) console.log(`  ${label}: ${grid.foot.length.toLocaleString()} footprints…`);
-  }
+  const seen = new Set<number>(); // dedup footprints that straddle tile borders
+  const tiles = tilesOf(b);
+  let done = 0;
+  await pool(tiles, POOL, async (t) => {
+    const feats = await downloadTile(t);
+    for (const f of feats) {
+      const oid = f.attributes.OBJECTID;
+      if (seen.has(oid)) continue;
+      seen.add(oid);
+      const ft = toFoot(f);
+      if (ft) grid.add(ft);
+    }
+    if (++done % 20 === 0 || done === tiles.length) {
+      console.log(`  ${label}: ${done}/${tiles.length} tiles, ${grid.foot.length.toLocaleString()} footprints…`);
+    }
+  });
   console.log(`  ${label}: ${grid.foot.length.toLocaleString()} footprints loaded`);
   return grid;
 }
@@ -159,15 +190,17 @@ interface Pt { id: number; lng: number; lat: number }
 async function loadCountyPoints(county: string, limit: number): Promise<Pt[]> {
   const pts: Pt[] = [];
   let after = 0;
+  // PostgREST caps RPC result rows (db-max-rows), so page until a call returns
+  // ZERO rows — never assume a short page is the last one.
   for (;;) {
-    const { data, error } = await db().rpc("county_property_points", { p_county: county, p_after_id: after, p_limit: 20000 });
+    const { data, error } = await db().rpc("county_property_points", { p_county: county, p_after_id: after, p_limit: 50000 });
     if (error) throw new Error(`county_property_points: ${error.message}`);
     const rows = (data as Pt[]) ?? [];
     if (rows.length === 0) break;
     for (const r of rows) { pts.push({ id: Number(r.id), lng: Number(r.lng), lat: Number(r.lat) }); }
     after = Number(rows[rows.length - 1].id);
     if (limit && pts.length >= limit) return pts.slice(0, limit);
-    if (rows.length < 20000) break;
+    if (pts.length % 100000 < rows.length) console.log(`  loaded ${pts.length.toLocaleString()} points…`);
   }
   return pts;
 }

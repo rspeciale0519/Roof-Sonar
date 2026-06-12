@@ -16,12 +16,22 @@ function projectRef(): string {
  */
 export async function sql<T = Record<string, unknown>>(query: string): Promise<T[]> {
   const token = requireEnv("SUPABASE_ACCESS_TOKEN");
-  const res = await fetch(`https://api.supabase.com/v1/projects/${projectRef()}/database/query`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
-  });
-  const text = await res.text();
-  if (!res.ok) throw new Error(`Management API ${res.status}: ${text.slice(0, 800)}`);
-  return text ? (JSON.parse(text) as T[]) : [];
+  const url = `https://api.supabase.com/v1/projects/${projectRef()}/database/query`;
+  let lastErr = "";
+  // The Management API's gateway flakes intermittently (500 "Failed to check
+  // user auth status", 502/503/504); retry those. 4xx is a real SQL/request
+  // error — surface it immediately.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+    const text = await res.text();
+    if (res.ok) return text ? (JSON.parse(text) as T[]) : [];
+    if (res.status < 500) throw new Error(`Management API ${res.status}: ${text.slice(0, 800)}`);
+    lastErr = `${res.status}: ${text.slice(0, 200)}`;
+    await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+  }
+  throw new Error(`Management API failed after retries — ${lastErr}`);
 }
