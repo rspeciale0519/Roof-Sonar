@@ -24,10 +24,14 @@ import { db, jurisdictionId, startRun, finishRun } from "./lib/db";
 import { normalizeAddress, streetNumber } from "./lib/normalize";
 import { classifyOccupancy } from "./lib/occupancy";
 
-const COUNTY_INFO: Record<string, { name: "Seminole" | "Volusia" | "Orange"; dorCode: string; fallbackSlug: string }> = {
-  seminole: { name: "Seminole", dorCode: "69", fallbackSlug: "seminole-county" },
-  volusia: { name: "Volusia", dorCode: "74", fallbackSlug: "volusia-county" },
-  orange: { name: "Orange", dorCode: "58", fallbackSlug: "orange-county" },
+// situsCity: whether this county's existing properties.situs_address values
+// include the city suffix (set by each county's permit ingest convention) —
+// the NAL situs must match it for the (jurisdiction, situs) upsert to hit.
+const COUNTY_INFO: Record<string, { name: "Seminole" | "Volusia" | "Orange" | "Pinellas"; dorCode: string; fallbackSlug: string; situsCity: boolean }> = {
+  seminole: { name: "Seminole", dorCode: "69", fallbackSlug: "seminole-county", situsCity: true },
+  volusia: { name: "Volusia", dorCode: "74", fallbackSlug: "volusia-county", situsCity: true },
+  orange: { name: "Orange", dorCode: "58", fallbackSlug: "orange-county", situsCity: false },
+  pinellas: { name: "Pinellas", dorCode: "62", fallbackSlug: "pinellas-county", situsCity: true },
 };
 
 // Situs-city -> jurisdiction slug. NOTE: postal city != municipal boundary
@@ -47,6 +51,18 @@ const CITY_SLUGS: Record<string, string> = {
   "WINTER GARDEN": "winter-garden", MAITLAND: "maitland", "BELLE ISLE": "belle-isle",
   EDGEWOOD: "edgewood", EATONVILLE: "eatonville", OAKLAND: "oakland",
   WINDERMERE: "windermere", "BAY LAKE": "bay-lake", "LAKE BUENA VISTA": "lake-buena-vista",
+  // Pinellas (NOTE: city of Seminole -> seminole-city; seminole-county is the FL county)
+  "ST PETERSBURG": "st-petersburg", "SAINT PETERSBURG": "st-petersburg",
+  CLEARWATER: "clearwater", LARGO: "largo", "PINELLAS PARK": "pinellas-park",
+  DUNEDIN: "dunedin", "TARPON SPRINGS": "tarpon-springs",
+  "ST PETE BEACH": "st-pete-beach", "ST PETERSBURG BEACH": "st-pete-beach",
+  "TREASURE ISLAND": "treasure-island", GULFPORT: "gulfport", SEMINOLE: "seminole-city",
+  "SAFETY HARBOR": "safety-harbor", OLDSMAR: "oldsmar", "MADEIRA BEACH": "madeira-beach",
+  BELLEAIR: "belleair", "SOUTH PASADENA": "south-pasadena",
+  "REDINGTON SHORES": "redington-shores", "INDIAN ROCKS BEACH": "indian-rocks-beach",
+  "INDIAN SHORES": "indian-shores", "KENNETH CITY": "kenneth-city",
+  "REDINGTON BEACH": "redington-beach", "NORTH REDINGTON BEACH": "north-redington-beach",
+  "BELLEAIR BEACH": "belleair-beach", "BELLEAIR BLUFFS": "belleair-bluffs",
 };
 
 // NAL column names (standard DOR layout). If a year's layout shifts, fix here.
@@ -170,7 +186,9 @@ async function main() {
         skippedUse++;
         continue;
       }
-      const situsRaw = [rec[COL.physAddr1], rec[COL.physAddr2]].filter(Boolean).join(" ");
+      const situsRaw = [rec[COL.physAddr1], rec[COL.physAddr2], info.situsCity ? rec[COL.physCity] : null]
+        .filter(Boolean)
+        .join(" ");
       const situs = normalizeAddress(situsRaw);
       if (!situs || !/^\d/.test(situs)) continue; // no usable street address
 
@@ -204,6 +222,7 @@ async function main() {
         occupancy,
         year_built: isNaN(yearBuilt) || yearBuilt < 1800 ? null : yearBuilt,
         building_sqft: isNaN(sqft) || sqft <= 0 ? null : sqft,
+        dor_use_code: useCode || null,
       });
       if (batch.length >= BATCH) await flush();
     }
