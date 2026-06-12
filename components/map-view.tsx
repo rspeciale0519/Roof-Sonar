@@ -45,7 +45,7 @@ function toGeojson(ps: MapProperty[], selected: Set<number>): GeoJSON.FeatureCol
         street_number: p.street_number ?? "",
         age_label: roofAgeLabel(p),
         sqrs_label: p.roofing_squares != null ? `${p.roofing_squares} sqrs` : "",
-        bucket: ageBucket(p.roof_year),
+        bucket: ageBucket(p.roof_year, p.year_built),
         selected: selected.has(p.id),
         payload: JSON.stringify(p),
         pin_color: p.pin_color,
