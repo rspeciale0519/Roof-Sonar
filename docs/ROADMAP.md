@@ -47,6 +47,7 @@
 - [ ] County-PA permit shortcuts discovered 2026-06-10: Volusia VCPA weekly CAMA Access DB has ALL-city permits (985k, ~107k roof; file in data/inbox/volusia-cama/) — build ingest; Orange has no PA shortcut (FastTrack captcha-gated, no GIS layer)
 - [x] SCPA custom data request SENT 2026-06-10 via scpafl.org contact form → data@scpafl.org (notification 37934; 10 business days, possible fees): county-wide CAMA permit table, all 8 Seminole jurisdictions. Tracked as slug scpa-seminole in send log + recipients.json
 - [ ] NAL owner-roll load (occupancy + building sqft → roofing squares)
+- [~] Footprint-based roofing squares (migration 0016): measure roof plan area from FEMA USA Structures building footprints — point-in-polygon match, nearest-within-15m fallback — instead of living-area×slope, which ran 20-33% low vs Planimeter. scripts/apply-footprint-squares.ts tile-parallel-downloads footprints per county; modal shows "· aerial" when footprint-sourced. Pinellas pilot (2026-06-12): 333,697/365,866 matched (91.2%; 75.3% pip), 4/5 homes within ±11% of Planimeter. Rolling out to remaining 8 counties
 - [x] Vercel deploy — live at roof-sonar.vercel.app, project robs-projects-c72886ba/roof-sonar (2026-06-10)
 - [x] Point roofsonar.com at the Vercel project — live, www-primary; fixed proxied records + stale apex A in Cloudflare (2026-06-10)
 - [ ] Set GitHub Actions repo secrets so the monthly ingest cron runs (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SOCRATA_APP_TOKEN) — ON HOLD per Rob

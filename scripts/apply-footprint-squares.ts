@@ -19,6 +19,9 @@
  * Big counties: NODE_OPTIONS=--max-old-space-size=4096 npx tsx ... Hillsborough
  */
 import { db } from "./lib/db";
+import { sql } from "./lib/sql";
+
+const COUNTIES = ["Orange", "Seminole", "Volusia", "Pinellas", "Sumter", "Lake", "Marion", "Pasco", "Hillsborough"];
 
 const USA = "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/USA_Structures_View/FeatureServer/0";
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0 Safari/537.36";
@@ -188,19 +191,27 @@ async function buildGrid(b: BBox, label: string): Promise<Grid> {
 interface Pt { id: number; lng: number; lat: number }
 
 async function loadCountyPoints(county: string, limit: number): Promise<Pt[]> {
+  // county is all-listed, so the literal below is injection-safe.
+  if (!COUNTIES.includes(county)) throw new Error(`Unknown county '${county}'. One of: ${COUNTIES.join(", ")}`);
   const pts: Pt[] = [];
   let after = 0;
-  // PostgREST caps RPC result rows (db-max-rows), so page until a call returns
-  // ZERO rows — never assume a short page is the last one.
+  // Load via the Management API, not the PostgREST RPC: PostgREST caps result
+  // rows at 1,000 (db-max-rows) and enforces a ~8s statement timeout that the
+  // county-filtered keyset scan trips on some counties. The Management API has
+  // no row cap and a ~100s timeout. Keyset-paginate by id.
   for (;;) {
-    const { data, error } = await db().rpc("county_property_points", { p_county: county, p_after_id: after, p_limit: 50000 });
-    if (error) throw new Error(`county_property_points: ${error.message}`);
-    const rows = (data as Pt[]) ?? [];
+    const rows = await sql<{ id: number; lng: number; lat: number }>(
+      `select p.id, st_x(p.geom::geometry) lng, st_y(p.geom::geometry) lat
+       from properties p join jurisdictions j on j.id = p.jurisdiction_id
+       where j.county = '${county}' and p.geom is not null and p.id > ${after}
+       order by p.id limit 50000`,
+    );
     if (rows.length === 0) break;
-    for (const r of rows) { pts.push({ id: Number(r.id), lng: Number(r.lng), lat: Number(r.lat) }); }
+    for (const r of rows) pts.push({ id: Number(r.id), lng: Number(r.lng), lat: Number(r.lat) });
     after = Number(rows[rows.length - 1].id);
     if (limit && pts.length >= limit) return pts.slice(0, limit);
-    if (pts.length % 100000 < rows.length) console.log(`  loaded ${pts.length.toLocaleString()} points…`);
+    if (rows.length < 50000) break;
+    console.log(`  loaded ${pts.length.toLocaleString()} points…`);
   }
   return pts;
 }
