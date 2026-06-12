@@ -14,7 +14,11 @@ import { db, jurisdictionId, startRun, finishRun } from "./lib/db";
 import { normalizeAddress, streetNumber } from "./lib/normalize";
 import { classifyOccupancy } from "./lib/occupancy";
 
-interface Cfg { name: "Sumter" | "Lake" | "Marion"; fallback: string; cities: Record<string, string> }
+// situsCity: append the city to the stored situs (default). Set false when the
+// county's coordinate source carries a city-less street address, so the
+// geocode situs join can match (Pasco: parcel formats differ between roll and
+// address layer, so situs is the join key and must match city-for-city).
+interface Cfg { name: "Sumter" | "Lake" | "Marion" | "Pasco" | "Hillsborough"; fallback: string; cities: Record<string, string>; situsCity?: boolean }
 
 const COUNTY: Record<string, Cfg> = {
   sumter: { name: "Sumter", fallback: "sumter-county", cities: {
@@ -26,6 +30,11 @@ const COUNTY: Record<string, Cfg> = {
     "HOWEY IN THE HILLS": "howey-in-the-hills", UMATILLA: "umatilla" } },
   marion: { name: "Marion", fallback: "marion-county", cities: {
     OCALA: "ocala", BELLEVIEW: "belleview", DUNNELLON: "dunnellon", MCINTOSH: "mcintosh", REDDICK: "reddick" } },
+  pasco: { name: "Pasco", fallback: "pasco-county", situsCity: false, cities: {
+    "DADE CITY": "dade-city", "NEW PORT RICHEY": "new-port-richey", "PORT RICHEY": "port-richey",
+    ZEPHYRHILLS: "zephyrhills", "SAN ANTONIO": "san-antonio", "ST LEO": "st-leo", "SAINT LEO": "st-leo" } },
+  hillsborough: { name: "Hillsborough", fallback: "hillsborough-county", cities: {
+    TAMPA: "tampa", "TEMPLE TERRACE": "temple-terrace", "PLANT CITY": "plant-city" } },
 };
 
 const BATCH = 1000;
@@ -69,7 +78,7 @@ async function main() {
     for await (const r of parser as AsyncIterable<Record<string, string>>) {
       rowsIn++;
       const city = (r.CITY ?? "").toUpperCase().trim();
-      const situsRaw = [r.SITUS, city].filter(Boolean).join(" ");
+      const situsRaw = cfg.situsCity === false ? (r.SITUS ?? "") : [r.SITUS, city].filter(Boolean).join(" ");
       const situs = normalizeAddress(situsRaw);
       if (!situs || !/^\d/.test(situs)) continue;
       const homestead = r.HOMESTEAD === "1" || r.HOMESTEAD?.toLowerCase() === "true";
