@@ -6,7 +6,7 @@
  */
 import { db } from "./lib/db";
 
-const COUNTIES = ["Seminole", "Volusia", "Orange", "Pinellas"];
+const COUNTIES = ["Seminole", "Volusia", "Orange", "Pinellas", "Sumter", "Lake", "Marion"];
 
 function base(jids: number[]) {
   return db().from("properties").select("*", { count: "exact", head: true }).in("jurisdiction_id", jids).not("geom", "is", null);
