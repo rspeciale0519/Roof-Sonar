@@ -74,6 +74,15 @@ async function main() {
   const descCols = arg("--desc").split(",").map((s) => s.trim()).filter(Boolean);
   const roofRe = new RegExp(arg("--roof", "re-?roof|roof"), "i");
   const all = process.argv.includes("--all");
+  // Some feeds carry only a year (Marion scrape) and a status to exclude
+  // (cancelled/void re-roofs never happened).
+  const yearCol = arg("--year");
+  const statusCol = arg("--status");
+  const skipStatusRe = arg("--skip-status") ? new RegExp(arg("--skip-status"), "i") : null;
+  // --raw-parcel keeps separators (Marion stores dashed parcels both in the roll
+  // and the permit feed); default strips them (Sumter stores clean parcels).
+  const rawParcel = process.argv.includes("--raw-parcel");
+  const NOW = new Date().getFullYear();
 
   const rows = /\.xlsx$/i.test(file) ? xlsxRows(file) : csvRows(file);
   let rowsIn = 0, roofRows = 0, sent = 0, applied = 0;
@@ -93,10 +102,16 @@ async function main() {
     rowsIn++;
     const desc = descCols.map((c) => r[c] ?? "").join(" ");
     if (!all && !roofRe.test(desc)) continue;
+    if (statusCol && skipStatusRe && skipStatusRe.test(r[statusCol] ?? "")) continue;
     roofRows++;
-    const parcel = cleanParcel(r[parcelCol] ?? "");
+    const parcel = rawParcel ? (r[parcelCol] ?? "").trim().toUpperCase() : cleanParcel(r[parcelCol] ?? "");
     let dt: string | null = null;
-    for (const c of dateCols) { dt = toISO(r[c]); if (dt) break; }
+    if (yearCol) {
+      const y = parseInt(r[yearCol] ?? "", 10);
+      if (y >= 1900 && y <= NOW + 1) dt = `${y}-07-01`;
+    } else {
+      for (const c of dateCols) { dt = toISO(r[c]); if (dt) break; }
+    }
     if (!parcel || !dt) continue;
     batch.push({ parcel, dt, num: r[numberCol] || null });
     if (batch.length >= BATCH) await flush();
