@@ -53,7 +53,7 @@ export const AGE_BUCKETS: { key: AgeBucket; label: string; color: string }[] = [
   { key: "6-10", label: "6–10 yrs", color: "#eab308" },
   { key: "11-15", label: "11–15 yrs", color: "#f97316" },
   { key: "16+", label: "16+ yrs", color: "#ef4444" },
-  { key: "unknown", label: "Unknown / orig.", color: "#9ca3af" },
+  { key: "unknown", label: "Unknown (no year)", color: "#9ca3af" },
 ];
 
 export const OCCUPANCIES: { key: MapProperty["occupancy"]; label: string }[] = [
@@ -64,9 +64,13 @@ export const OCCUPANCIES: { key: MapProperty["occupancy"]; label: string }[] = [
   { key: "unknown", label: "Unknown" },
 ];
 
-export function ageBucket(roofYear: number | null): AgeBucket {
-  if (roofYear == null) return "unknown";
-  const age = new Date().getFullYear() - roofYear;
+/** Roof-age bucket from the best-known basis: the re-roof permit year if we
+ *  have one, else the build year (an un-permitted roof is assumed original).
+ *  Mirrors the coalesce(roof_year, year_built) logic in properties_in_bbox. */
+export function ageBucket(roofYear: number | null, yearBuilt: number | null = null): AgeBucket {
+  const basis = roofYear ?? yearBuilt;
+  if (basis == null) return "unknown";
+  const age = new Date().getFullYear() - basis;
   if (age <= 5) return "0-5";
   if (age <= 10) return "6-10";
   if (age <= 15) return "11-15";
