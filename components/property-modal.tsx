@@ -234,8 +234,14 @@ export default function PropertyModal({ propertyId, onClose, onDataChanged }: Pr
             <section>
               <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
                 <Detail
-                  label="Roof year"
-                  value={p.roof_year != null ? `${p.roof_year} (${roofAgeLabel({ roof_year: p.roof_year, year_built: p.year_built })})` : null}
+                  label="Roof age"
+                  value={
+                    p.roof_year != null
+                      ? `${p.roof_year} (${roofAgeLabel({ roof_year: p.roof_year, year_built: p.year_built })})`
+                      : p.year_built != null
+                        ? roofAgeLabel({ roof_year: null, year_built: p.year_built })
+                        : null
+                  }
                 />
                 <Detail label="Year built" value={p.year_built != null ? String(p.year_built) : null} />
                 <Detail label="Roofing squares" value={p.roofing_squares != null ? String(p.roofing_squares) : null} />
