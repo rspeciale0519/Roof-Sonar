@@ -14,7 +14,11 @@ import { parse } from "csv-parse/sync";
 import { db } from "./lib/db";
 import { normalizeAddress } from "./lib/normalize";
 
-const COUNTY: Record<string, string> = { seminole: "Seminole", volusia: "Volusia", orange: "Orange" };
+const COUNTY: Record<string, string> = {
+  seminole: "Seminole", volusia: "Volusia", orange: "Orange",
+  pinellas: "Pinellas", hillsborough: "Hillsborough", pasco: "Pasco",
+  sumter: "Sumter", lake: "Lake", marion: "Marion",
+};
 
 interface Point {
   parcel_number: string | null;
