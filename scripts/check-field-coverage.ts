@@ -6,7 +6,7 @@
  */
 import { db } from "./lib/db";
 
-const COUNTIES = ["Seminole", "Volusia", "Orange", "Pinellas"];
+const COUNTIES = ["Seminole", "Volusia", "Orange", "Pinellas", "Sumter", "Lake", "Marion"];
 
 // Base query: map-visible (geom not null) properties in the given jurisdictions.
 function base(jids: number[]) {
