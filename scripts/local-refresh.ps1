@@ -28,7 +28,7 @@ function Step($name, [ScriptBlock]$cmd) {
   & $cmd 2>&1 | Tee-Object -FilePath $log -Append
 }
 
-Step "Tampa CivicData (--recent)" { npx tsx scripts/ingest-tampa-permits.ts --recent }
+Step "Tampa CivicData (--recent, 90d window)" { npx tsx scripts/ingest-tampa-permits.ts --recent --since 90d }
 Step "Hillsborough HCPA scrape (20k chunk)" { npx tsx scripts/scrape-hillsborough-permits.ts --limit 20000 }
 
 "=== done :: $(Get-Date -Format o) ===" | Tee-Object -FilePath $log -Append

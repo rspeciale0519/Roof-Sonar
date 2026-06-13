@@ -18,6 +18,7 @@ import fs from "node:fs";
 import { parse } from "csv-parse";
 import ExcelJS from "exceljs";
 import { applyRoofPermits } from "./lib/sql";
+import { parseSince } from "./lib/since";
 
 const BATCH = 1000;
 
@@ -82,6 +83,7 @@ async function main() {
   // --raw-parcel keeps separators (Marion stores dashed parcels both in the roll
   // and the permit feed); default strips them (Sumter stores clean parcels).
   const rawParcel = process.argv.includes("--raw-parcel");
+  const since = parseSince(arg("--since") || undefined); // weekly cron: only recent permits
   const NOW = new Date().getFullYear();
 
   const rows = /\.xlsx$/i.test(file) ? xlsxRows(file) : csvRows(file);
@@ -113,6 +115,7 @@ async function main() {
       for (const c of dateCols) { dt = toISO(r[c]); if (dt) break; }
     }
     if (!parcel || !dt) continue;
+    if (since && dt < since) continue;
     batch.push({ parcel, dt, num: r[numberCol] || null });
     if (batch.length >= BATCH) await flush();
   }

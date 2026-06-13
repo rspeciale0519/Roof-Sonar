@@ -15,6 +15,9 @@
  */
 import * as shapefile from "shapefile";
 import { applyRoofPermits } from "./lib/sql";
+import { sinceArg } from "./lib/since";
+
+let SINCE: string | null = null; // --since: skip permits issued before this (weekly cron)
 
 const DBF = "data/inbox/hillsborough/parcel_4_public.dbf";
 const UA = { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0 Safari/537.36" } };
@@ -105,6 +108,7 @@ async function ingestResource(res: { id: string; label: string }, map: Map<strin
       if (!folio) { nomap++; continue; }
       const dt = toISO(r.IssuedDate) ?? toISO(r.AppliedDate);
       if (!dt) continue;
+      if (SINCE && dt < SINCE) continue;
       batch.push({ parcel: folio, dt, num: (r.PermitNum as string) || null });
       if (batch.length >= BATCH) await flush();
     }
@@ -116,6 +120,8 @@ async function ingestResource(res: { id: string; label: string }, map: Map<strin
 
 async function main() {
   const recent = process.argv.includes("--recent");
+  SINCE = sinceArg();
+  if (SINCE) console.log(`Incremental: only permits issued on/after ${SINCE}`);
   const list = recent ? RESOURCES.slice(0, 1) : RESOURCES;
   const map = await strapFolioMap();
   let roof = 0, applied = 0, nomap = 0;

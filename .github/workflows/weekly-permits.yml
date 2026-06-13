@@ -29,10 +29,10 @@ jobs:
           cache: npm
       - run: npm ci
 
-      - name: Pinellas — PA nightly RP_PERMITS (download + ingest roof permits)
+      - name: Pinellas — PA nightly RP_PERMITS (download + ingest recent roof permits)
         run: |
           npx tsx scripts/fetch-pinellas.ts
-          npx tsx scripts/ingest-pinellas.ts
+          npx tsx scripts/ingest-pinellas.ts --since 90d   # 90-day overlap window; advance-only
 
       - name: Orange/Orlando — Socrata permits (incremental)
         if: always()

@@ -13,6 +13,7 @@ import fs from "node:fs";
 import { parse } from "csv-parse";
 import { db, jurisdictionId, startRun, finishRun, insertRawPermits, upsertPermitProperties, PermitUpsert } from "./lib/db";
 import { normalizeAddress, streetNumber } from "./lib/normalize";
+import { sinceArg } from "./lib/since";
 
 const DIR = "data/inbox/pinellas";
 const NULL_DATE = /^1899-/;
@@ -57,6 +58,9 @@ async function streamCsv(file: string, onRow: (row: Record<string, string>) => v
 }
 
 async function main() {
+  const since = sinceArg(); // weekly cron passes --since 90d to skip old permits
+  if (since) console.log(`Incremental: only permits issued on/after ${since}`);
+
   // 1. per-parcel attributes (situs, use code, coordinates)
   const parcels = new Map<string, ParcelInfo>();
   const nInfo = await streamCsv(`${DIR}/RP_PROPERTY_INFO.csv`, (r) => {
@@ -74,7 +78,7 @@ async function main() {
 
   // 2. roof permits joined to parcels
   const seen = new Set<string>();
-  const stats = { notRoof: 0, badDate: 0, noParcel: 0, noSitus: 0, unknownAgency: 0, dupes: 0 };
+  const stats = { notRoof: 0, badDate: 0, old: 0, noParcel: 0, noSitus: 0, unknownAgency: 0, dupes: 0 };
   type Joined = { slug: string; raw: Record<string, string>; upsert: PermitUpsert; luc: string | null };
   const bySlug = new Map<string, Joined[]>();
   const unknownAgencies = new Map<string, number>();
@@ -83,6 +87,7 @@ async function main() {
     if (r.PERMIT_TYPE !== "96" && !/ROOF/i.test(r.PERMIT_DSCR ?? "")) { stats.notRoof++; return; }
     const date = (r.ISSUE_DT ?? "").slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || NULL_DATE.test(date)) { stats.badDate++; return; }
+    if (since && date < since) { stats.old++; return; }
     const key = `${r.STRAP}|${r.PERMIT_NUMBER}`;
     if (seen.has(key)) { stats.dupes++; return; }
     seen.add(key);
