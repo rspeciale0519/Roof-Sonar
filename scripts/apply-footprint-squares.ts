@@ -27,7 +27,8 @@ const USA = "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0 Safari/537.36";
 const SLOPE = 1.3; // display only; the DB recomputes from settings.roof_slope_multiplier
 const MIN_SQFT = 200; // ignore sheds/pools
-const MAX_NEAR = 0.000135; // ~15 m, nearest-building fallback radius (degrees lat)
+const MAX_NEAR = 0.000135; // ~15 m: nearest building assigned unconditionally (almost always the home's own)
+const NEAR_FAR = 0.00045; // ~50 m: nearest building 15-50 m out is assigned only if MUTUAL (see match)
 const CELL = 0.003; // ~330 m grid cell
 const PAGE = 2000; // USA Structures maxRecordCount
 const POOL = 8; // concurrent tile downloads
@@ -118,6 +119,33 @@ class Grid {
   }
 }
 
+/** Grid of property geocodes for the reverse "nearest property to a building" lookup. */
+class PointGrid {
+  private map = new Map<string, Pt[]>();
+  add(p: Pt): void {
+    const k = `${Math.floor(p.lng / CELL)}:${Math.floor(p.lat / CELL)}`;
+    let a = this.map.get(k);
+    if (!a) { a = []; this.map.set(k, a); }
+    a.push(p);
+  }
+  /** id of the property geocode nearest to (lng,lat) in the 3x3 neighborhood, or -1. */
+  nearestId(lng: number, lat: number): number {
+    const cx = Math.floor(lng / CELL), cy = Math.floor(lat / CELL);
+    const cosLat = Math.cos((lat * Math.PI) / 180);
+    let best = -1, bd = Infinity;
+    for (let x = cx - 1; x <= cx + 1; x++) for (let y = cy - 1; y <= cy + 1; y++) {
+      const a = this.map.get(`${x}:${y}`);
+      if (!a) continue;
+      for (const p of a) {
+        const dx = (lng - p.lng) * cosLat, dy = lat - p.lat;
+        const d = dx * dx + dy * dy;
+        if (d < bd) { bd = d; best = p.id; }
+      }
+    }
+    return best;
+  }
+}
+
 function toFoot(f: Feature): Foot | null {
   const sqft = Number(f.attributes.SQFEET);
   const ring0 = f.geometry?.rings?.[0];
@@ -144,8 +172,16 @@ function pointInRing(ring: number[], x: number, y: number): boolean {
   return inside;
 }
 
-/** Footprint area for a point: containing polygon (largest if overlap), else nearest within ~15 m. */
-function match(grid: Grid, lng: number, lat: number): { sqft: number; near: boolean } | null {
+/**
+ * Footprint area for a property point:
+ *  - containing polygon (largest if overlap) — exact;
+ *  - else nearest building ≤15 m — assigned unconditionally (almost always its own);
+ *  - else nearest building 15-50 m — assigned ONLY if mutual: this property is also
+ *    that building's nearest geocode. Stops a far-off parcel-centroid geocode from
+ *    grabbing a building that "belongs" to a closer property. props=null skips the
+ *    mutual check (offline self-test, where there is no surrounding population).
+ */
+function match(grid: Grid, props: PointGrid | null, lng: number, lat: number, selfId: number): { sqft: number; near: boolean } | null {
   let bestSqft = 0;
   for (const idx of grid.cell(lng, lat)) {
     const f = grid.foot[idx];
@@ -154,16 +190,19 @@ function match(grid: Grid, lng: number, lat: number): { sqft: number; near: bool
   }
   if (bestSqft > 0) return { sqft: Math.round(bestSqft), near: false };
 
-  let nd = Infinity, ns = 0;
+  let nd = Infinity, nf: Foot | null = null;
   const cosLat = Math.cos((lat * Math.PI) / 180);
   for (const idx of grid.neighborhood(lng, lat)) {
     const f = grid.foot[idx];
     if (f.sqft < MIN_SQFT) continue;
     const dx = (lng - f.cx) * cosLat, dy = lat - f.cy;
     const d = Math.hypot(dx, dy);
-    if (d < nd) { nd = d; ns = f.sqft; }
+    if (d < nd) { nd = d; nf = f; }
   }
-  return nd <= MAX_NEAR ? { sqft: Math.round(ns), near: true } : null;
+  if (!nf) return null;
+  if (nd <= MAX_NEAR) return { sqft: Math.round(nf.sqft), near: true };
+  if (nd <= NEAR_FAR && (!props || props.nearestId(nf.cx, nf.cy) === selfId)) return { sqft: Math.round(nf.sqft), near: true };
+  return null;
 }
 
 async function buildGrid(b: BBox, label: string): Promise<Grid> {
@@ -260,7 +299,7 @@ async function selftest(): Promise<void> {
   console.log("\nsitus                          | fp_sqft | fp_sq | plan_sq | living_sq | fp_err | living_err | src");
   console.log("-".repeat(104));
   for (const h of SELFTEST) {
-    const m = match(grid, h.lng, h.lat);
+    const m = match(grid, null, h.lng, h.lat, 0);
     const fpSq = m ? Math.round((m.sqft * SLOPE) / 100) : null;
     const planSq = Math.round((h.plan * SLOPE) / 100);
     const livingSq = Math.round((h.living * SLOPE) / 100);
@@ -274,6 +313,40 @@ async function selftest(): Promise<void> {
   }
 }
 
+// All 10 ground-truth homes (Planimeter roof plan sqft) for re-validating the matcher
+// inside a real county population (so the mutual-nearest check is exercised).
+const VALIDATION = [
+  { county: "Pinellas", situs: "8201 46TH ST N PINELLAS PARK", lng: -82.695701, lat: 27.846684, plan: 2245.78 },
+  { county: "Pinellas", situs: "5251 39TH AVE N ST PETERSBURG", lng: -82.705137, lat: 27.807566, plan: 1000.72 },
+  { county: "Pinellas", situs: "12322 68TH ST PINELLAS PARK", lng: -82.733206, lat: 27.884509, plan: 2246.92 },
+  { county: "Pinellas", situs: "11904 69TH WAY PINELLAS PARK", lng: -82.735650, lat: 27.880553, plan: 2351.67 },
+  { county: "Pinellas", situs: "10273 109TH AVE LARGO", lng: -82.781071, lat: 27.872164, plan: 1388.72 },
+  { county: "Marion", situs: "7 HEMLOCK CIR OCALA", lng: -82.033450, lat: 29.139900, plan: 2449.11 },
+  { county: "Marion", situs: "4002 SW 115TH TER OCALA", lng: -82.312150, lat: 29.148500, plan: 3216.04 },
+  { county: "Marion", situs: "9547 SE 61ST TER BELLEVIEW", lng: -82.046875, lat: 29.083350, plan: 3840.70 },
+  { county: "Lake", situs: "56341 ACORN RD", lng: -81.534940, lat: 29.176142, plan: 1505.92 },
+  { county: "Lake", situs: "25255 VANBUREN ST", lng: -81.729562, lat: 28.713550, plan: 3614.39 },
+];
+
+async function check(County: string): Promise<void> {
+  const homes = VALIDATION.filter((h) => h.county === County);
+  if (homes.length === 0) { console.error(`No validation homes for ${County}.`); return; }
+  const pts = await loadCountyPoints(County, 0);
+  const b = bboxOf(pts);
+  const grid = await buildGrid(b, County);
+  const props = new PointGrid();
+  for (const p of pts) props.add(p);
+  console.log("\nsitus                          | fp_sqft | planim | err  | src");
+  console.log("-".repeat(66));
+  for (const h of homes) {
+    const pt = pts.find((p) => Math.abs(p.lng - h.lng) < 2e-5 && Math.abs(p.lat - h.lat) < 2e-5);
+    if (!pt) { console.log(`${h.situs.padEnd(30)} | point not found`); continue; }
+    const m = match(grid, props, pt.lng, pt.lat, pt.id);
+    const err = m ? `${(((m.sqft - h.plan) / h.plan) * 100).toFixed(0)}%` : "—";
+    console.log(`${h.situs.padEnd(30)} | ${String(m ? m.sqft : "—").padStart(7)} | ${String(Math.round(h.plan)).padStart(6)} | ${err.padStart(4)} | ${m ? (m.near ? "near" : "pip") : "none"}`);
+  }
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   if (args.includes("--selftest")) { await selftest(); return; }
@@ -284,6 +357,7 @@ async function main(): Promise<void> {
   const county = args.find((a) => !a.startsWith("--") && a !== String(limit));
   if (!county) { console.error("usage: tsx scripts/apply-footprint-squares.ts <County> [--dry] [--limit N] | --selftest"); process.exit(1); }
   const County = county.charAt(0).toUpperCase() + county.slice(1).toLowerCase();
+  if (args.includes("--check")) { await check(County); return; }
 
   console.log(`Footprint squares for ${County}${dry ? " (dry run)" : ""}${limit ? ` (limit ${limit})` : ""}`);
   const pts = await loadCountyPoints(County, limit);
@@ -292,11 +366,13 @@ async function main(): Promise<void> {
   console.log(`${pts.length.toLocaleString()} property points; bbox ${b.minLng.toFixed(3)},${b.minLat.toFixed(3)} → ${b.maxLng.toFixed(3)},${b.maxLat.toFixed(3)}`);
 
   const grid = await buildGrid(b, County);
+  const props = new PointGrid();
+  for (const p of pts) props.add(p);
 
   const updates: { id: number; sqft: number; near: boolean }[] = [];
   let pip = 0, near = 0, none = 0;
   for (const p of pts) {
-    const m = match(grid, p.lng, p.lat);
+    const m = match(grid, props, p.lng, p.lat, p.id);
     if (!m) { none++; continue; }
     if (m.near) near++; else pip++;
     updates.push({ id: p.id, sqft: m.sqft, near: m.near });
