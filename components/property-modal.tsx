@@ -12,6 +12,7 @@ interface PropertyDetail {
   roof_year: number | null;
   year_built: number | null;
   roofing_squares: number | null;
+  squares_source: string | null;
   owner_name: string | null;
   owner_mailing_address: string | null;
   occupancy: string;
@@ -244,7 +245,14 @@ export default function PropertyModal({ propertyId, onClose, onDataChanged }: Pr
                   }
                 />
                 <Detail label="Year built" value={p.year_built != null ? String(p.year_built) : null} />
-                <Detail label="Roofing squares" value={p.roofing_squares != null ? String(p.roofing_squares) : null} />
+                <Detail
+                  label="Roofing squares"
+                  value={
+                    p.roofing_squares != null
+                      ? `${p.roofing_squares}${p.squares_source?.startsWith("footprint") ? " · aerial" : ""}`
+                      : null
+                  }
+                />
                 <Detail label="Owner" value={p.owner_name} />
                 {/* Fix 11: owner mailing address */}
                 <Detail label="Owner mailing" value={p.owner_mailing_address} />

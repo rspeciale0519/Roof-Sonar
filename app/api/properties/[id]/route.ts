@@ -8,7 +8,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   const { data: property, error } = await sb
     .from("properties")
     .select(
-      "id, situs_address, street_number, roof_year, year_built, roofing_squares, owner_name, " +
+      "id, situs_address, street_number, roof_year, year_built, roofing_squares, squares_source, owner_name, " +
       "owner_mailing_address, occupancy, homestead, last_permit_number, last_permit_date, do_not_knock, " +
       "dor_use_code, jurisdictions(name)"
     )
