@@ -14,6 +14,19 @@ function projectRef(): string {
  * admin queries the service-role PostgREST client can't issue. Note: a single
  * statement that runs past ~100s trips a Cloudflare 524, so chunk big writes.
  */
+/**
+ * Apply a batch of roof permits via the Management API rather than PostgREST.
+ * apply_roof_permits normalizes parcel ids in the join, which the PostgREST path
+ * (~8s statement timeout) trips on large counties (Hillsborough). The Management
+ * API allows ~100s. p_rows: [{parcel, dt, num}].
+ */
+export async function applyRoofPermits(county: string, rows: { parcel: string; dt: string; num: string | null }[]): Promise<number> {
+  const json = JSON.stringify(rows).replace(/'/g, "''");
+  const cty = county.replace(/'/g, "''");
+  const r = await sql<{ n: number }>(`select apply_roof_permits('${cty}'::text, '${json}'::jsonb) as n`);
+  return Number(r[0]?.n ?? 0);
+}
+
 export async function sql<T = Record<string, unknown>>(query: string): Promise<T[]> {
   const token = requireEnv("SUPABASE_ACCESS_TOKEN");
   const url = `https://api.supabase.com/v1/projects/${projectRef()}/database/query`;
