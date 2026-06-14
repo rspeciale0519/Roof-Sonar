@@ -174,5 +174,197 @@
     "classification": "portal",
     "attachments": [],
     "date": "2026-06-10T17:47:29.000Z"
+  },
+  {
+    "uid": 26,
+    "slug": "edgewood",
+    "from": "sriffle@edgewood-fl.gov",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T18:25:28.000Z"
+  },
+  {
+    "uid": 27,
+    "slug": "scpa-seminole",
+    "from": "data@scpafl.org",
+    "subject": "RE: SCPA Department Contact Custom Data Request",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-10T18:53:30.000Z"
+  },
+  {
+    "uid": 28,
+    "slug": "seminole-county",
+    "from": "bppublicrecords@seminolecountyfl.gov",
+    "subject": "FW: Public Records Request — Roofing Permit Data",
+    "classification": "data",
+    "attachments": [
+      "data\\inbox\\seminole-county\\2026-06-14-PermitsIssuedListing.xls"
+    ],
+    "date": "2026-06-10T19:01:10.000Z"
+  },
+  {
+    "uid": 29,
+    "slug": "winter-garden",
+    "from": "hmurphy@cwgdn.com",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "data",
+    "attachments": [
+      "data\\inbox\\winter-garden\\2026-06-14-Residential_Reroofs_01.01.2000_to_02.01.2026.pdf",
+      "data\\inbox\\winter-garden\\2026-06-14-Reroofs_02.01.2026_to_06.10.2026.pdf",
+      "data\\inbox\\winter-garden\\2026-06-14-Commercial_Reroofs_01.01.2000_to_02.01.2026.pdf"
+    ],
+    "date": "2026-06-10T19:19:31.000Z"
+  },
+  {
+    "uid": 30,
+    "slug": "longwood",
+    "from": "longwoodfl@request.justfoia.com",
+    "subject": "City of Longwood - Public Records Request PRR26-426: Confirmation",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T20:59:21.000Z"
+  },
+  {
+    "uid": 31,
+    "slug": "winter-park",
+    "from": "messages@nextrequest.com",
+    "subject": "Your City of Winter Park, FL public records request #26-1237 has been submitted.",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T21:05:11.000Z"
+  },
+  {
+    "uid": 32,
+    "slug": "winter-park",
+    "from": "messages@nextrequest.com",
+    "subject": "[ACTION REQUIRED] Your City of Winter Park, FL public records portal account",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T21:06:15.000Z"
+  },
+  {
+    "uid": 33,
+    "slug": "unmatched-portal",
+    "from": "messages@nextrequest.com",
+    "subject": "[ACTION REQUIRED] Your Sumter County, FL public records portal account",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T21:09:26.000Z"
+  },
+  {
+    "uid": 34,
+    "slug": "unmatched-portal",
+    "from": "messages@nextrequest.com",
+    "subject": "Your Sumter County, FL public records request #26-13443 has been submitted.",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T21:08:46.000Z"
+  },
+  {
+    "uid": 35,
+    "slug": "unmatched-portal",
+    "from": "wildwoodfl@request.justfoia.com",
+    "subject": "City of Wildwood - Records Request Confirmation PRR-2026-592",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-10T23:14:05.000Z"
+  },
+  {
+    "uid": 37,
+    "slug": "lake-mary",
+    "from": "kaustera@lakemaryfl.com",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-11T11:50:56.000Z"
+  },
+  {
+    "uid": 38,
+    "slug": "debary",
+    "from": "efrankton@debary.org",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "data",
+    "attachments": [
+      "data\\inbox\\debary\\2026-06-14-CitizenserveReport_-_2026-06-11T082428.598.xlsx"
+    ],
+    "date": "2026-06-11T12:32:18.000Z"
+  },
+  {
+    "uid": 39,
+    "slug": "volusia-county",
+    "from": "volusia@govqa.us",
+    "subject": "Volusia County Growth and Resource Management :: G012660-061026",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-11T12:38:00.000Z"
+  },
+  {
+    "uid": 40,
+    "slug": "seminole-county",
+    "from": "bppublicrecords@seminolecountyfl.gov",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "data",
+    "attachments": [
+      "data\\inbox\\seminole-county\\2026-06-14-SC_Building_Public_Request_Portal.pdf"
+    ],
+    "date": "2026-06-11T12:53:30.000Z"
+  },
+  {
+    "uid": 41,
+    "slug": "unmatched-portal",
+    "from": "messages@nextrequest.com",
+    "subject": "[Document Released to Requester] Sumter County, FL public records request #26-13443",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-11T13:03:48.000Z"
+  },
+  {
+    "uid": 42,
+    "slug": "unmatched-portal",
+    "from": "messages@nextrequest.com",
+    "subject": "Your Sumter County, FL public records request #26-13443 has been closed.",
+    "classification": "portal",
+    "attachments": [],
+    "date": "2026-06-11T13:04:47.000Z"
+  },
+  {
+    "uid": 45,
+    "slug": "ocoee",
+    "from": "msibbitt@ocoee.org",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "fee",
+    "attachments": [],
+    "date": "2026-06-11T16:47:57.000Z"
+  },
+  {
+    "uid": 46,
+    "slug": "orange-county",
+    "from": "publicrecordunit@ocfl.net",
+    "subject": "Orange County FL Public Records Request Tracking PRMS #  PRR-165558:  Confirmation",
+    "classification": "ack",
+    "attachments": [],
+    "date": "2026-06-11T17:31:00.000Z"
+  },
+  {
+    "uid": 47,
+    "slug": "orange-county",
+    "from": "publicrecordunit@ocfl.net",
+    "subject": "Orange County FL Public Records Request Tracking PRMS #  PRR-165559:  Confirmation",
+    "classification": "ack",
+    "attachments": [],
+    "date": "2026-06-11T17:33:40.000Z"
+  },
+  {
+    "uid": 48,
+    "slug": "ponce-inlet",
+    "from": "hricci@ponce-inlet.org",
+    "subject": "RE: Public Records Request — Roofing Permit Data",
+    "classification": "data",
+    "attachments": [
+      "data\\inbox\\ponce-inlet\\2026-06-14-Roof_Permits_01-2017_thru_06-2026.pdf"
+    ],
+    "date": "2026-06-12T13:33:59.000Z"
   }
 ]

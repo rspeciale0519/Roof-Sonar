@@ -34,6 +34,10 @@ jobs:
           npx tsx scripts/fetch-pinellas.ts
           npx tsx scripts/ingest-pinellas.ts --since 90d   # 90-day overlap window; advance-only
 
+      - name: Tampa/Hillsborough — CivicData (recent, map+progress from DB)
+        if: always()
+        run: npx tsx scripts/ingest-tampa-permits.ts --recent --since 90d
+
       - name: Orange/Orlando — Socrata permits (incremental)
         if: always()
         run: npm run ingest:orlando

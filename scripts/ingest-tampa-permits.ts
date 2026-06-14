@@ -13,13 +13,11 @@
  * Covers the City of Tampa only (CivicData is Tampa's feed); unincorporated
  * Hillsborough + Temple Terrace/Plant City need the HCPA records request.
  */
-import * as shapefile from "shapefile";
-import { applyRoofPermits } from "./lib/sql";
+import { applyRoofPermits, sql } from "./lib/sql";
 import { sinceArg } from "./lib/since";
 
 let SINCE: string | null = null; // --since: skip permits issued before this (weekly cron)
 
-const DBF = "data/inbox/hillsborough/parcel_4_public.dbf";
 const UA = { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0 Safari/537.36" } };
 const CKAN = "https://www.civicdata.com/api/3/action/datastore_search";
 const PAGE = 1000;
@@ -66,14 +64,17 @@ async function fetchJson(url: string): Promise<{ result?: { total: number; recor
 
 async function strapFolioMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
-  const src = await shapefile.openDbf(DBF);
+  let after = "";
   for (;;) {
-    const r = await src.read();
-    if (r.done) break;
-    const v = r.value as { STRAP?: string; FOLIO?: string };
-    if (v.STRAP && v.FOLIO) map.set(norm(v.STRAP), String(v.FOLIO).trim());
+    const rows = await sql<{ strap: string; folio: string }>(
+      `select strap, folio from hcpa_parcel_map where strap > '${after.replace(/'/g, "''")}' order by strap limit 50000`,
+    );
+    if (!rows.length) break;
+    for (const r of rows) map.set(norm(r.strap), r.folio);
+    after = rows[rows.length - 1].strap;
+    if (rows.length < 50000) break;
   }
-  console.log(`STRAP→FOLIO map: ${map.size.toLocaleString()} parcels`);
+  console.log(`STRAP→FOLIO map: ${map.size.toLocaleString()} parcels (from hcpa_parcel_map)`);
   return map;
 }
 
