@@ -40,12 +40,16 @@ const RESOURCES: { id: string; label: string }[] = [
 
 const norm = (s: unknown) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 const ROOF = /roof/i;
+const NOT_ROOF = /roof ?top|\brtu\b|roof drain|roof vent|solar/i; // rooftop HVAC / solar, not a re-roof
 
 function toISO(v: unknown): string | null {
   const s = String(v ?? "").trim();
   const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/) || s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if (!m) return null;
-  return m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  const iso = m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  const y = Number(iso.slice(0, 4));
+  if (y < 1950 || y > 2027) return null; // reject bogus years — apply_roof_permits is advance-only/un-rewindable
+  return iso;
 }
 
 async function fetchJson(url: string): Promise<{ result?: { total: number; records: Record<string, unknown>[] } }> {
@@ -103,7 +107,7 @@ async function ingestResource(res: { id: string; label: string }, map: Map<strin
     for (const r of recs) {
       const mapped = String(r.PermitTypeMapped ?? "");
       const type = String(r.PermitType ?? "");
-      if (!(mapped.toLowerCase() === "roof" || (ROOF.test(type) && /trade|roof/i.test(type)))) continue;
+      if (!(mapped.toLowerCase() === "roof" || (ROOF.test(type) && /trade|roof/i.test(type) && !NOT_ROOF.test(type)))) continue;
       roof++;
       const folio = map.get(norm(r.PIN));
       if (!folio) { nomap++; continue; }
