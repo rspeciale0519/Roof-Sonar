@@ -60,3 +60,4 @@ data/processed/*
 __pycache__/
 archive/next-corrupted-build-clobber/
 archive/unsorted-sumter-dupes/
+data/temp/

@@ -13,10 +13,11 @@
  * Covers the City of Tampa only (CivicData is Tampa's feed); unincorporated
  * Hillsborough + Temple Terrace/Plant City need the HCPA records request.
  */
-import * as shapefile from "shapefile";
-import { applyRoofPermits } from "./lib/sql";
+import { applyRoofPermits, sql } from "./lib/sql";
+import { sinceArg } from "./lib/since";
 
-const DBF = "data/inbox/hillsborough/parcel_4_public.dbf";
+let SINCE: string | null = null; // --since: skip permits issued before this (weekly cron)
+
 const UA = { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0 Safari/537.36" } };
 const CKAN = "https://www.civicdata.com/api/3/action/datastore_search";
 const PAGE = 1000;
@@ -39,12 +40,16 @@ const RESOURCES: { id: string; label: string }[] = [
 
 const norm = (s: unknown) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 const ROOF = /roof/i;
+const NOT_ROOF = /roof ?top|\brtu\b|roof drain|roof vent|solar/i; // rooftop HVAC / solar, not a re-roof
 
 function toISO(v: unknown): string | null {
   const s = String(v ?? "").trim();
   const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/) || s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if (!m) return null;
-  return m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  const iso = m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  const y = Number(iso.slice(0, 4));
+  if (y < 1950 || y > 2027) return null; // reject bogus years — apply_roof_permits is advance-only/un-rewindable
+  return iso;
 }
 
 async function fetchJson(url: string): Promise<{ result?: { total: number; records: Record<string, unknown>[] } }> {
@@ -63,14 +68,17 @@ async function fetchJson(url: string): Promise<{ result?: { total: number; recor
 
 async function strapFolioMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
-  const src = await shapefile.openDbf(DBF);
+  let after = "";
   for (;;) {
-    const r = await src.read();
-    if (r.done) break;
-    const v = r.value as { STRAP?: string; FOLIO?: string };
-    if (v.STRAP && v.FOLIO) map.set(norm(v.STRAP), String(v.FOLIO).trim());
+    const rows = await sql<{ strap: string; folio: string }>(
+      `select strap, folio from hcpa_parcel_map where strap > '${after.replace(/'/g, "''")}' order by strap limit 50000`,
+    );
+    if (!rows.length) break;
+    for (const r of rows) map.set(norm(r.strap), r.folio);
+    after = rows[rows.length - 1].strap;
+    if (rows.length < 50000) break;
   }
-  console.log(`STRAP→FOLIO map: ${map.size.toLocaleString()} parcels`);
+  console.log(`STRAP→FOLIO map: ${map.size.toLocaleString()} parcels (from hcpa_parcel_map)`);
   return map;
 }
 
@@ -99,12 +107,13 @@ async function ingestResource(res: { id: string; label: string }, map: Map<strin
     for (const r of recs) {
       const mapped = String(r.PermitTypeMapped ?? "");
       const type = String(r.PermitType ?? "");
-      if (!(mapped.toLowerCase() === "roof" || (ROOF.test(type) && /trade|roof/i.test(type)))) continue;
+      if (!(mapped.toLowerCase() === "roof" || (ROOF.test(type) && /trade|roof/i.test(type) && !NOT_ROOF.test(type)))) continue;
       roof++;
       const folio = map.get(norm(r.PIN));
       if (!folio) { nomap++; continue; }
       const dt = toISO(r.IssuedDate) ?? toISO(r.AppliedDate);
       if (!dt) continue;
+      if (SINCE && dt < SINCE) continue;
       batch.push({ parcel: folio, dt, num: (r.PermitNum as string) || null });
       if (batch.length >= BATCH) await flush();
     }
@@ -116,6 +125,8 @@ async function ingestResource(res: { id: string; label: string }, map: Map<strin
 
 async function main() {
   const recent = process.argv.includes("--recent");
+  SINCE = sinceArg();
+  if (SINCE) console.log(`Incremental: only permits issued on/after ${SINCE}`);
   const list = recent ? RESOURCES.slice(0, 1) : RESOURCES;
   const map = await strapFolioMap();
   let roof = 0, applied = 0, nomap = 0;

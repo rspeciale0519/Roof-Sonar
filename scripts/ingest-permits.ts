@@ -17,7 +17,8 @@
 import fs from "node:fs";
 import { parse } from "csv-parse";
 import ExcelJS from "exceljs";
-import { db } from "./lib/db";
+import { applyRoofPermits } from "./lib/sql";
+import { parseSince } from "./lib/since";
 
 const BATCH = 1000;
 
@@ -82,6 +83,7 @@ async function main() {
   // --raw-parcel keeps separators (Marion stores dashed parcels both in the roll
   // and the permit feed); default strips them (Sumter stores clean parcels).
   const rawParcel = process.argv.includes("--raw-parcel");
+  const since = parseSince(arg("--since") || undefined); // weekly cron: only recent permits
   const NOW = new Date().getFullYear();
 
   const rows = /\.xlsx$/i.test(file) ? xlsxRows(file) : csvRows(file);
@@ -90,9 +92,9 @@ async function main() {
 
   async function flush() {
     if (batch.length === 0) return;
-    const { data, error } = await db().rpc("apply_roof_permits", { p_county: county, p_rows: batch });
-    if (error) throw new Error(`apply_roof_permits failed: ${error.message}`);
-    applied += (data as number) ?? 0;
+    // Management-API apply: apply_roof_permits normalizes parcels in the join,
+    // which trips PostgREST's ~8s timeout on large counties (Pinellas/Hillsborough).
+    applied += await applyRoofPermits(county, batch);
     sent += batch.length;
     if (sent % 50000 < BATCH) console.log(`  ${rowsIn} read, ${roofRows} roof, ${sent} sent, ${applied} property-rows advanced…`);
     batch = [];
@@ -113,6 +115,7 @@ async function main() {
       for (const c of dateCols) { dt = toISO(r[c]); if (dt) break; }
     }
     if (!parcel || !dt) continue;
+    if (since && dt < since) continue;
     batch.push({ parcel, dt, num: r[numberCol] || null });
     if (batch.length >= BATCH) await flush();
   }

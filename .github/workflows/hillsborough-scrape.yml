@@ -1,0 +1,35 @@
+name: Hillsborough HCPA scrape
+
+# Per-parcel HCPA re-roof scrape for Hillsborough unincorporated + non-Tampa
+# parcels (the permits CivicData lacks). Fully DB-resumable (hcpa_parcel_map +
+# properties.permit_scraped_at), so each daily run grinds the next 20k of the
+# ~444k backlog and stamps them done; it self-stops once drained, then just
+# re-scans whatever's still un-stamped (new parcels). No local files.
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # daily 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "parcels to scrape this run"
+        required: false
+        default: "20000"
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Scrape next chunk
+        run: npx tsx scripts/scrape-hillsborough-permits.ts --limit ${{ github.event.inputs.limit || '20000' }}

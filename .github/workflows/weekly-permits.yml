@@ -1,0 +1,43 @@
+name: Weekly permit refresh
+
+# Re-fetches the cloud-reachable permit feeds (no local files needed) and
+# re-ingests them. apply_roof_permits only ADVANCES roof_year (newest wins), so
+# this safely picks up new re-roofs each week and is idempotent. Counties that
+# depend on local files/state (Tampa = HCPA parcel dbf, Hillsborough scraper =
+# checkpoint, Volusia = Access DB / Windows driver) run from the local Windows
+# task instead — see scripts/local-refresh.ps1.
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Mondays 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Pinellas — PA nightly RP_PERMITS (download + ingest recent roof permits)
+        run: |
+          npx tsx scripts/fetch-pinellas.ts
+          npx tsx scripts/ingest-pinellas.ts --since 90d   # 90-day overlap window; advance-only
+
+      - name: Tampa/Hillsborough — CivicData (recent, map+progress from DB)
+        if: always()
+        run: npx tsx scripts/ingest-tampa-permits.ts --recent --since 90d
+
+      - name: Orange/Orlando — Socrata permits (incremental)
+        if: always()
+        run: npm run ingest:orlando
